@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+Having Your Own Domain Name with a Dynamic IP Address
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body  bgcolor=white style="font-family: helvetica">
+
+<table width="100%">
+<tr>
+
+<td align=left valign=top>
+<img align=middle src="gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+
+<td>
+<h1>
+Having Your Own Domain Name with a Dynamic IP Address
+</h1>
+
+</tr>
+</table>
+
+<hr>
+
+<p>
+We describe here a method of using a domain name of your own, obtained from a domain
+name registrar, for a machine with a dynamic IP address.
+It involves <b>setting up
+<a href="http://isc.org/products/BIND/">BIND</a>
+on the machine</b>.
+
+<p>
+Note that versions of BIND for Mac and Windows 9x are available too (see
+<a href="http://www.dns.net/dnsrd/servers/">http://www.dns.net/dnsrd/servers/</a>
+and
+<a href="ftp://ftp.is.co.za/networking/ip/dns/bind/nt/">
+ftp://ftp.is.co.za/networking/ip/dns/bind/nt/</a>
+).
+
+<p><hr>
+
+<p>
+The user should obtain one or more domain names from dynamic DNS service.
+<u>These dynamic IP domain names are then given to the user's
+domain name registar as the names of the name servers</u> for the user's domain.
+
+<p>
+Most registrars require at least two name servers to be provided.
+
+<p>
+There is a <u>reliability advantage to using two or more different dynamic domain
+services</u>. If one is down, the other will still be able to provide a name
+server address.
+
+<p>
+<u>Do not use "wildcard" domain names for this</u>.
+These are typically implemented using <code>CNAME</code> records.
+Some resolvers (for example BIND) will
+refuse to use a name server if a <code>CNAME</code> record
+is encountered while resolving its address.
+
+<p>
+On the user's machine BIND only needs to serve external requests (the user
+is under no obligation to use their own BIND installation to serve their DNS needs).
+So it only needs one zone. 
+
+<p>
+To avoid the need to modify the BIND configuration when the IP address changes,
+that one zone can just use <code>MX</code> and <code>CNAME</code> records to one
+of the dynamic IP domain names that were used for the name servers. The zone
+could contain something like:
+
+<blockquote>
+<pre>
+$TTL 1D
+you.ca.     SOA   you.ca. root.you.ca. (
+                    20020101      ;serial
+                    3600          ;refresh
+                    1800          ;retry
+                    604800        ;expiration
+                    0             ;TTL for NACK
+                    )
+you.ca.     NS    you.dyndnservice1.ca.
+you.ca.     NS    you.dyndnservice2.ca.
+you.ca.     MX 0  you.dyndnsservice1.ca.
+www.you.ca. CNAME you.dyndnsservice1.ca.
+</pre>
+</blockquote>
+
+<p>
+Note that CNAME records have some limitations and possibly unexpected effects.
+For example:
+<p>
+<ul>
+<li>
+It is not possible to have a <code>CNAME</code> and an <code>SOA</code> record
+for the same name. So the zone for <code>site.com</code> cannot have a
+<code>CNAME</code> record for <code>site.com</code>.
+<p>
+<li>
+It is not possible to have a <code>CNAME</code> and an <code>MX</code> record
+for the same name.
+<p>
+<li>
+If mail is sent to a host name defined in a <code>CNAME</code> record, a
+standards compliant MTA will re-address the mail to the canonical host name, so
+that the receiving MTA must accept mail addressed to the canonical/GnuDIP host
+name. 
+</ul>
+
+<p>
+<u>It would be better to set up a structure that modifies the BIND configuration
+when the IP address changes</u>. The details of doing this would very greatly depending on
+your circumstances. For an example of how this might be done for
+<a href="http://slackware.com/">Slackware Linux</a> serving as an Internet gateway,
+obtaining its dynamic IP address using DHCP,
+see <a href="ownexample.html">ownexample.html</a>.
+
+<p><hr>
+
+<p>
+One difficulty that may be encountered is that domain name registrars
+typically require you to enter not just the name server names for a domain, but also 
+<u>IP addresses corresponding to these names</u>. 
+ 
+<p> 
+However, <u>the DNS root servers will only use these IP addresses if "glue" records
+are needed</u>.
+
+<p>
+This is discussed in 
+<a href="http://www.ietf.org/rfc/rfc1033.txt">RFC 1033</a> 
+("Domain Administrators Operations Guide"). We quote: 
+ 
+<blockquote><i> 
+"You may only put data in your domain server that you are authoritative for. 
+You must not add entries for domains other than your own (except for the 
+special case of "glue records")". 
+</i></blockquote> 
+ 
+and 
+ 
+<blockquote><i> 
+"If the name server host for a particular domain is itself inside the domain, 
+then a 'glue' record will be needed. A glue record is an A (address) RR that 
+specifies the address of the server. Glue records are only needed in the server 
+delegating the domain, not in the domain itself." 
+</i></blockquote> 
+ 
+<p>
+The root and top level domain servers use
+<a href="http://isc.org/products/BIND/">BIND</a>.
+BIND enforces this RFC standard, as can be verified by setting up a test
+configuration of BIND. In particular:
+<ul>
+
+<li>
+It <u>refuses to load "out of zone" RR-s</u>, writing a message to sylog for
+each such record. So for example, if BIND finds an A RR with a left-side ending
+in ".org." in a zone file for the ".com" domain, it will not load it.
+
+<p><li>
+It will <u>silently ignore any remaining unnecessary glue records</u>, and will
+instead do a DNS look up for the name server name.
+
+</ul>
+
+<p>
+Since the domain names used here as name server names are not within the domain
+the name servers serve, there is no need for glue records, and
+<b><u>any addresses your registrar forces you to enter will not be used</u></b>.
+
+<p><hr>
+
+<p>
+It should be noted that some registrars' web interfaces perform unnecessary and ignorant
+validation tests on the name server information as it is entered.
+
+<p>
+The user should be able to get around these by
+temporarily setting the IP addresses for their dynamic IP accounts
+to appropriate (distinct) values.
+Once the name server information has been accepted by the domain name
+registrar's web interface, the IP addresses may be reset correctly.
+
+<p><hr>
+
+</body>
+</html>
+

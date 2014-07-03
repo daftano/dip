@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+GnuDIP Release 2.3 - Linux/UNIX Client README File
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body bgcolor=white>
+
+<table><tr valign=middle><td>
+<img align=middle src="gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+</td><td>
+<h1>GnuDIP Release 2.3 - Linux/UNIX Client README File</h1>
+</table>
+
+<hr>
+
+<p>
+This is the Linux/UNIX Client Package for GnuDIP Release 2.3.
+
+<p>
+The GnuDIP software implements a Dynamic IP DNS service.
+It provides clients with a static DNS name even if
+their IP address is dynamically assigned.
+
+<p>
+GnuDIP is written in <a href="http://www.perl.com/">Perl</a>.
+
+<p>
+GnuDIP has two main parts on the server side:
+<ul>
+<li>
+a daemon that listens for client requests and
+<li>
+a web interface that is used as the administration tool
+and as the user's tool to manage their own account.
+</ul>
+
+<p>
+With this client you can have your IP address updated automatically at
+several GnuDIP sites simultaneously. This client will only send an update
+to the GnuDIP servers if the IP address at the time of the last update
+is no longer valid, or enough time has expired. The validity of the old
+address is determined without generating any network traffic.
+
+<p>
+GnuDIP is released under the GPL. Please see the file
+<a href="COPYING"><code>COPYING</code></a>
+included in this distribution for more information.
+
+<p><hr>
+
+<p>
+As mentioned, GnuDIP is written in
+<a href="http://www.perl.com/">Perl</a>.
+More specifically, the requirements for this client are:
+<ul>
+<li>
+<a href="http://www.perl.com/pub/a/language/info/software.html">
+the base Perl Language system</a>
+</ul>
+
+<p>
+If you have a recent
+<a href="http://www.kernel.org/">Linux</a>,
+<a href="http://openbsd.org/">OpenBSD</a>
+or such, Perl will probably be available on your installation CD.
+
+<p>
+This client comes with the Perl
+<a href="http://search.cpan.org/search?dist=Digest-Perl-MD5">
+Digest-Perl-MD5 module</a>, a pure Perl
+replacement for the Perl
+<a href="http://search.cpan.org/search?dist=Digest-MD5">
+Digest-MD5 module</a>, which does the MD5 calculation
+in compiled binary code. The faster Digest-MD5 module will be used
+if it is installed, otherwise the pure Perl Digest-Perl-MD5 module
+will be used.
+
+<p>
+As with the base Perl system, the Digest-MD5 module will
+probably be available on your installation CD.
+If not, you can check the support Web site for your OS distribution,
+to see whether a more recent Perl binary package has Digest-MD5.
+
+<p>
+To install
+<a href="http://search.cpan.org/search?dist=Digest-MD5">
+the CPAN Digest-MD5 package</a>
+requires the <code>make</code> utility, the C compiler and the linker
+for your system to be installed.
+
+<p><hr>
+
+<p>
+Read <a href="INSTALL.html"><code>INSTALL.html</code></a> for instructions on
+installing this GnuDIP client.
+
+<p>
+Read <a href="CLIENT.html"><code>CLIENT.html</code></a> for a description of
+how to use this GnuDIP client once it is installed.
+
+<p><hr>
+
+<p>
+You may want to browse the file
+<a href="credits.html"><code>credits.html</code></a>.
+
+<p><hr>
+
+</body>
+
+</html>
+

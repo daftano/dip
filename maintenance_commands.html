@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+GnuDIP User Maintenance Commands
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body bgcolor=white>
+
+<table><tr valign=middle><td>
+<img align=middle src="gnudip/html/gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+</td><td>
+<h1>GnuDIP User Maintenance Commands</h1>
+</table>
+
+<hr>
+
+<p>
+Here we describe four line mode commands that may used to do user maintenance
+from the command line, or from a script (e.g. PHP).
+
+<p><hr>
+
+<p>
+Here is the "help" for these commands:
+
+<blockquote>
+
+<pre>
+# gdipuseradd.pl -h
+usage: gdipuseradd.pl { -h | [-p password] [-m email] user domain }
+usage: Add GnuDIP user "user" within domain "domain" with
+usage: password "password" and (optionally) E-mail address "email".
+usage: -h: Print this usage message.
+usage: -p: Specify clear text password. The stored password will the MD5
+usage:     hash of this value. Password is disabled if not specified.
+usage: -m: Specify E-mail address.
+</pre>
+<p>
+<pre>
+# gdipusermod.pl -h
+usage: gdipusermod.pl { -h |
+usage:   [-m email] [-p password] [-x rawpassword]
+usage:   [-w {YES|NO}] [-y {YES|NO}] [-r]
+usage:    user domain }
+usage: Modify GnuDIP user "user" within domain "domain".
+usage: -h: Print this usage message.
+usage: -m: Specify E-mail address.
+usage: -p: Specify clear text password. The stored password will
+usage:     the MD5 hash of this value.
+usage: -x: Specify the hashed password. This will be stored as
+usage:     password hash value without any change.
+usage: -w: Allow ("YES") or disallow ("NO") wild cards.
+usage: -y: Allow ("YES") or disallow ("NO") MX records.
+usage: -r: Remove all DNS information.
+</pre>
+<p>
+<pre>
+# gdipuserdel.pl -h
+usage: gdipuserdel.pl { -h | user domain }
+usage: Delete GnuDIP user "user" within domain "domain".
+usage: -h: Print this usage message.
+</pre>
+<p>
+<pre>
+# gdipuserget.pl -h
+usage: gdipuserget.pl { -h | user domain }
+usage: Display GnuDIP user "user" within domain "domain".
+usage: -h: Print this usage message.
+</pre>
+
+</blockquote>
+
+<p>
+Here is a demonstration of their use:
+
+<blockquote>
+
+<pre>
+# gdipuseradd.pl -p testpass -m rob@demo.com rob dyn.yourhost.com
+Added user "rob.dyn.yourhost.com"
+</pre>
+
+</blockquote>
+
+<p>
+After logging in as "rob.dyn.yourhost.com" and setting the IP address:
+
+<blockquote>
+
+<pre>
+# ping rob.dyn.yourhost.com
+PING rob.dyn.yourhost.com (127.0.0.1): 56 octets data
+64 octets from 127.0.0.1: icmp_seq=0 ttl=255 time=0.2 ms
+64 octets from 127.0.0.1: icmp_seq=1 ttl=255 time=0.1 ms
+ 
+--- rob.dyn.yourhost.com ping statistics ---
+2 packets transmitted, 2 packets received, 0% packet loss
+round-trip min/avg/max = 0.1/0.1/0.2 ms
+</pre>
+<p>
+<pre>
+# gdipuserget.pl rob dyn.yourhost.com
+Retrieved user "rob.dyn.yourhost.com"
+MXbackup = NO
+wildcard = NO
+password = 179ad45c6ce2cb97cf1029e212046e81
+forwardurl =
+allowmx = NO
+MXvalue =
+autourlon =
+level = USER
+currentip = 127.0.0.1
+username = rob
+allowwild = NO
+updated = 2002-05-24 20:43:01
+domain = dyn.yourhost.com
+email = rob@demo.com
+</pre>
+<p>
+<pre>
+# gdipusermod.pl -m dummy@yourhost.com rob dyn.yourhost.com
+Updated user "rob.dyn.yourhost.com"
+</pre>
+<p>
+<pre>
+# gdipuserget.pl rob dyn.yourhost.com
+Retrieved user "rob.dyn.yourhost.com"
+MXbackup = NO
+wildcard = NO
+password =
+forwardurl =
+allowmx = NO
+MXvalue =
+autourlon =
+level = USER
+currentip = 127.0.0.1
+username = rob
+allowwild = NO
+updated = 2002-05-24 20:44:15
+domain = dyn.yourhost.com
+email = dummy@yourhost.com
+</pre>
+<p>
+<pre>
+# gdipuserdel.pl rob dyn.yourhost.com
+User "rob.dyn.yourhost.com" has been deleted and removed from DNS
+</pre>
+<p>
+<pre>
+# ping rob.dyn.yourhost.com
+ping: unknown host rob.dyn.yourhost.com
+</pre>
+
+</blockquote>
+
+<p>
+The "parameter = value" lines printed by <code>gdipuserget.pl</code> go to
+standard output. All of the other messages from these commands go to standard
+error.
+
+<p>
+The return codes are:
+<ul>
+<li>0 - Success
+<li>1 - User not found or already exists, as appropriate
+<li>2 - User error or configuration error - message(s) issued
+</ul>
+
+<p>
+The commands must be run under a user ID that can read the
+<a href="gnudip/etc/gnudip.conf"><code>gnudip.conf</code></a> file.
+
+<p><hr>
+
+</body>
+
+</html>
+

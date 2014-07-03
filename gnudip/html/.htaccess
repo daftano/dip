@@ -1,0 +1,5 @@
+ReadmeName .README
+HeaderName .HEADER
+RemoveHandler .pl
+RemoveType .pl
+AddType text/plain .pl

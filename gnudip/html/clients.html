@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <title>GnuDIP Client Software</title>
+   <meta http-equiv="Content-Style-Type" content="text/css">
+<base target="_blank">
+</head>
+
+<body  bgcolor=white style="font-family: helvetica">
+
+<table width="100%">
+<tr>
+
+<td align=left valign=top>
+<img align=middle src="gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+
+<td>
+<h1>
+GnuDIP Client Software
+</h1>
+
+</tr>
+</table>
+
+<hr>
+
+<p>
+We list here Gnudip client software packages from the current GnuDIP project,
+Mike Machado's original GnuDIP project and from third party developers.
+
+<p>
+The protocols that these clients use to update IP addresses on a GnuDIP
+server are described in <a href="protocol.html">protocol.html</a>.
+
+<p><hr>
+
+<h3>
+Client Software From Current GnuDIP Project
+</h3>
+
+<blockquote>
+Note that there may be an updated version of the GnuDIP client at
+<a href="http://gnudip2.sourceforge.net/gnudip-www/latest/gnudip/html/clients.html">
+SourceForge</a>.
+</blockquote>
+
+<ul>
+
+<li>Linux/UNIX client package
+
+<p>
+You can <b>download or browse</b> this package from:
+
+<blockquote>
+<a href="client/UNIX/">client/UNIX/</a>.
+</blockquote>
+
+<p>
+The directory contains a tar ball and a directory which is the unpacked tar ball.
+
+<p><li>Windows client package
+
+<p>
+This package requires the prior separate installation of
+<a href="http://aspn.activestate.com/ASPN/Downloads/ActivePerl/">ActivePerl</a>.
+You can <b>download or browse</b> this package from:
+
+<blockquote>
+<a href="client/Windows/">client/Windows/</a>
+</blockquote>
+
+The directory has a Windows self-extracting zip executable file and 
+a directory which is the unzipped self-extracting zip file.
+
+<p><li>stand alone Windows client package
+
+<p>
+ActivePerl takes up about 50 meg of disk space, and most of this is not needed by the
+client script. So there is a separate version of the Windows client package,
+<b>with the necessary files from ActivePerl included</b> with it. It should be
+easier to install. You can <b>download or browse</b> this package from:
+
+<blockquote> 
+<a href="client/Windows_standalone/">client/Windows_standalone/</a> 
+</blockquote> 
+  
+The directory has a Windows self-extracting zip executable file and 
+a directory which is the unzipped self-extracting zip file.
+
+</ul>
+
+<h3>
+Client Software From Original GnuDIP Project
+</h3>
+<ul>
+<li>
+a UNIX X-Windows (GUI) client
+<p>This is available in
+<a target="_self"
+href="http://gnudip2.sourceforge.net/legacy/download/xgnudip2/xgdipc-1.2.tar.gz">
+http://gnudip2.sourceforge.net/legacy/download/xgnudip2/xgdipc-1.2.tar.gz</a>
+or at the original GnuDIP site in
+<a target="_self" href="ftp://cheapnet.net/pub/xgnudip2/xgdipc-1.2.tar.gz">
+ftp://cheapnet.net/pub/xgnudip2/xgdipc-1.2.tar.gz</a>.
+
+<p><li>
+a Windows GUI client
+<p>
+This was written using Visual Basic.
+It is available in
+<a target="_self"
+href="http://gnudip2.sourceforge.net/legacy/download/gnudip/gdipc-win32.zip">
+http://gnudip2.sourceforge.net/legacy/download/gnudip/gdipc-win32.zip</a>
+or at the original GnuDIP site in
+<a target="_self" href="ftp://cheapnet.net/pub/GnuDIP/gdipc-win32.zip">
+ftp://cheapnet.net/pub/GnuDIP/gdipc-win32.zip</a>.
+<p>
+The source is available in
+<a target="_self"
+href="http://gnudip2.sourceforge.net/legacy/download/gnudip/gdipc-win32-src.zip">
+http://gnudip2.sourceforge.net/legacy/download/gnudip/gdipc-win32-src.zip</a>
+or at the original GnuDIP site in
+<a target="_self" href="ftp://cheapnet.net/pub/GnuDIP/gdipc-win32-src.zip">
+ftp://cheapnet.net/pub/GnuDIP/gdipc-win32-src.zip</a>.
+
+</ul>
+
+<h3>
+Client Software Written by Others
+</h3>
+<ul>
+
+<li> 
+<a href="http://www.noeld.com/dldynsite.htm">DynSite</a>
+
+<p>
+This software is for Windows.
+
+<p>
+For GnuDIP sites at release 2.2.0 and earlier, this client
+uses an unofficial update interface involving "spoofing" the web tool.
+Authors of programs to update multiple dynamic DNS sites often do this.
+In release 2.3.0, the web tool's security was greatly improved, and this
+type of spoofing is no longer possible.
+
+<p>
+This client also supports the new HTTP update protocol used with releases
+from 2.3.4 onwards.
+
+<p>
+<li> 
+<a href="http://www.directupdate.net/">DirectUpdate</a>
+
+<p>
+This software is for Windows.
+
+<p>
+This client supports the TCP update protocol.
+
+<p><li> 
+<a href="http://www.gusnet.cx/proj/ez-ipupdate/">ez-ipupdate</a>
+
+<p>
+This software is for Linux/UNIX.
+
+<p><li> 
+<a href="http://woogie.net/linksysmon/">linksysmon</a>
+
+<p>
+This is not actually a GnuDIP client. It
+"is a tool for monitoring Linksys BEFSR41 and BEFSR11 firewalls".
+According to its home page "it can detect external IP address changes
+(if you are using either DHCP or PPPOE) and can call an external program to
+process the change".
+
+<p>
+The ez-ipupdate home page recommends it. This author has not used it, but it
+could probably be used to detect an IP address change on a Linksys device and
+call the GnuDIP client. This would be an alternative to the GnuDIP client's
+IP address change detection mechanism, which is to "ping" the address with UDP
+packets sent to itself.
+
+<p>
+This software is for Linux/UNIX.
+
+<p><li>
+<u>DynClient</u>
+
+<p>
+This software is for Windows.
+
+<p>
+This client is open source software written in Delphi.
+
+<p>
+It is available from
+<a href="http://gnudip2.sourceforge.net/dynclient/">
+http://gnudip2.sourceforge.net/dynclient/</a>
+or from its author's site at
+<a href="http://www.andrearusso.it/Client/Client.html">
+http://www.andrearusso.it/Client/Client.htm</a>
+. The author's site is written in Italian.
+
+<p><li> 
+<a href="http://www.hi-ho.ne.jp/yoshihiro_e/dice/index.html">DiCE</a>
+
+<p>
+Most of the text on this page is in Japanese.
+
+<p>
+This software is for Windows and Linux.
+
+</ul>
+ 
+<p><hr>
+
+</body>
+
+</html>
+

@@ -1,0 +1,666 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+GnuDIP Release 2.3.5++ - New Features and Changes Since Release 2.1.2
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body bgcolor=white>
+
+<table><tr valign=middle><td>
+<img align=middle src="gnudip/html/gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+</td><td>
+<table><tr>
+<td><h1>GnuDIP Release 2.3.5++</h1></td>
+<td align="center"><h1>-</h1></td>
+<td align="right"><h1>New Features and Changes Since Release 2.1.2</h1></td>
+</tr></table>
+</table>
+
+<hr>
+
+<h3>Server and Web Tool Operational Changes</h3>
+<blockquote>
+
+<p><b>Release 2.3.5++</b>
+<ul>
+
+<li>
+Made more bug fixes and minor upgrades to release 2.3.5 -
+without bumping the release number.
+
+<p><li>
+Made changes to accomodate Perl 5.8.0 when using "<code>-T</code>".
+
+<p><li>
+Removed all occurences "<code>-T</code>", "<code>-w</code>" and
+"<code>use warnings;</code>", in the hope of avoiding future
+problems with new releases of Perl.
+
+<p><li>
+Removed the authors' names, E-mail addresses and web site names
+from all Perl source and web page source, except for the names
+(no E-mail or web sites) in the "<code>credits.html</code>" files,
+and the name of the legacy GnuDIP author in files that evolved
+directly from the legacy version.
+
+</ul>
+
+<p><b>Release 2.3.5++</b>
+<ul>
+
+<li>
+Made bug fixes and minor upgrades to release 2.3.5 -
+without bumping the release number!
+
+<p><li>
+Completed support for tinydns. MX value for a tinydns domain
+must be an IP address.
+
+<p><li>
+Removed the "release notes" page from the GUI.
+
+</ul>
+
+<p><b>Release 2.3.5</b>
+<ul>
+
+<li>
+Removed all links to the SourceForge web site.
+
+<p><li>
+Replaced <code>gnudip.gif</code> with <code>gnudip.jpg</code>.
+
+<p><li>
+The clients can now be downloaded from the "help" page.
+
+</ul>
+
+<p><b>Release 2.3.4</b>
+<ul>
+
+<li>
+Bug fixes and improvements to the code base.
+
+<p><li>
+Added support for Client-Server updates using an HTTP adaptation
+of the update protocol.
+
+<p><li>
+Worked with the author of
+<a href="http://www.noeld.com/dldynsite.htm">DynSite</a>
+to ensure that DynSite supports the new HTTP update protocol.
+
+</ul>
+
+<p><b>Release 2.3.3</b>
+
+<p><b>Release 2.3.2</b>
+<ul>
+
+<li>
+Added support for operation behind NAT/IP masquerade box. Update server
+returns IP address to client if asked.
+
+</ul>
+<p><b>Release 2.3.1</b>
+<ul>
+
+<li>
+GnuDIP can now be run <b>without mySQL</b>, using normal UNIX files instead. As a
+by-product GnuDIP now has full database abstraction. 
+
+<p>
+<li>
+A script ("<code>gdipunld.pl</code>") is included to
+<b>dump the user database to a flat file</b>.
+Corresponding to this a script ("<code>gdipreld.pl</code>") is included to
+<b>reload the user database from a flat file</b>.
+
+<p>
+<li>
+The <b>Digest::MD5 Perl module is now optional</b>. It will provide better performance
+than the pure Perl module that comes with GnuDIP. 
+
+<p>
+<li>
+The BIND zone reload shell script in the "back end" example was enhanced to handle
+incrementing the zone serial number.
+
+<p>
+<li>
+Some small bugs were fixed.
+
+</ul>
+
+<p><b>Release 2.3.0</b>
+<ul>
+
+<li>
+As of release 2.3.0, <u>GnuDIP was completely rewritten</u>.
+There is little if any code left from release 2.1.2.
+
+<p>
+<li>
+Early releases of BIND and <a href="http://tinydns.org/">tinydns</a>, which cannot
+be updated using <code>nsupdate</code> are supported using a set of "back end" scripts
+that interface with GnuDIP where <code>nsupdate</code> normally would.
+
+<p>
+<li>
+Under Release 2.1.2, information for one domain was kept in the "globalprefs" table using
+the "<b>GNUDIP_DOMAIN</b>" and "<b>ALLOW_CHANGE_PASS</b> preference names.
+All domain information is now kept in the "domains" table.
+
+<p>
+<li>
+Under Release 2.1.2, the name of the domain for use in Auto URL cookies had
+to provided in "System Settings", and was kept "globalprefs" table using
+the "<b>COOKIE_DOMAIN</b>" preference name.
+This manual intervention is no longer required.
+
+<p>
+<li>
+The web tool has greatly increased security. All pages contain a set of
+<b>credentials</b>
+(user name, user domain, hashed password, login id, time page generated)
+which are
+<b>"signed" using a key known only to the GnuDIP server</b>. The "logon id"
+is only generated from the GnuDIP login page.
+<p>
+The GnuDIP administrator may specify a "Page Timeout" (in seconds) after
+which pages older than this interval may no longer be used.
+This does not apply to adminstrator accounts.
+<p>
+It is now impossible to "spoof" the
+web interface into updating the IP address using a single link to an URL -
+particluary when time outs are used.
+<p>
+This was implemented to discourage the use of poorly designed
+user-written update clients that abuse the GnuDIP server.
+
+<p>
+<li>
+The "<b>HEADER_FILE</b>" preference is no longer used. It has been replaced by
+the "header_file" and "trailer_file" options in <code>gnudip.conf</code>.
+These files of HTML are
+<b>included at the beginning and end of every page</b>.
+
+<p>
+<li>
+There is a new "<b>Require and Validate E-mail</b>" system preference.
+When this is on, a user must provide an E-mail address during self-registration.
+An E-mail is sent to the address provided. The E-mail contains a "signed"
+URL which may be used to create a user with the information the user entered.
+In this way we are sure that the E-mail address provided is valid.
+When a user changes their E-mail addres, an E-mail is again sent in order to
+validate that the address is valid.
+
+<p>
+<li>
+The web tool will now run under
+<a href="http://perl.apache.org/#modules">mod_perl Apache::Registry</a>.
+
+</ul>
+
+<p><b>Release 2.2.0</b>
+<ul>
+
+<li>
+All updates to DNS servers are done using the <b>DNS dynamic update protocol</b>.
+Release 2.1.2 used the
+BIND "<code>ndc reload</code>" command to reload all zones on the DNS server at regular frequent
+intervals. In a high load environment, this was problematic. With support for incremental zone
+transfer and dynamic update forwarding now available in BIND Release 9.1.1, reloading zones is
+no longer necessary. The BIND "<code>nsupdate</code>" command is used for this.
+<p>
+This also means that <u>DNS changes occur immediately</u>.
+<p>
+The <code>nsupdate</code> command line and the DNS <code>TTL</code> value to use can
+be specified globally, or for specific domains. In this way different <code>TSIG</code>
+keys may be used with each domain. <u>The DNS servers do not need to be on the same
+computer as GnuDIP</u>. These DNS servers do not need to be running BIND, so long as they
+support the dynamic DNS protocol.
+
+<p>
+<li>
+The GnuDIP dynamic IP update server now <b>runs under INETD or XINETD</b>, rather than stand-alone.
+This allows the server to be controlled with regard to access by IP address and load on the system.
+It also simplifies the code dramatically - reducing the risk of code error and making maintenance
+easier.
+
+<p>
+<li>
+Under Release 2.1.2 the relationship of user names to the GnuDIP domains could be specified as
+either "<b><code>GLOBAL</code></b>" or "<b><code>INDIVIDUAL</code></b>". For <code>GLOBAL</code>,
+each user name
+applied to every GnuDIP domain, and an update to the IP address of a user affected
+every GnuDIP domain. This is problematic when real-time dynamic DNS updates (not just for IP
+address <code>A</code> records but also wild card <code>CNAME</code> records and
+mail exchanger <code>MX</code> records) are being done.
+The <code>GLOBAL</code> option no longer exists. Related conversion issues are discussed in
+the installation notes.
+
+<p>
+<li>
+The <b>IP addresses acceptable to the web tool must be specified</b>.
+These would normally agree with those specified for the INET update server.
+
+<p>
+<li>
+<b>DNS updates are only done if the IP address</b> of the web user or IP update client program
+<b>differs</b> from the IP address in GnuDIP's mySQL database.
+
+<p>
+<li>
+All <b>DNS updates</b> done either by the Web Interface or via a Dynamic IP Update Client <b>are
+logged to syslog</b>. Release 2.1.2 logged to a seperate file, and did not log for the Web Interface.
+
+<p>
+<li>
+All GnuDIP system files are now <b>contained within one file system directory</b>. This directory
+may have any name and be located anywhere in the file system. The common subroutine library and
+configuration file are located relative to the executing program. The subdirectories of the GnuDIP
+directory are the familiar <code>bin</code>, <code>cgi-bin</code>, <code>etc</code>, <code>lib</code> and
+<code>sbin</code>. Basically, although still entirely written in Perl, GnuDIP Release 2.3
+is packaged more like typical GNU autoconf-ed UNIX system software packages.
+
+<p>
+<li>
+The "<b>Manage Users</b>" button for administrative users now has an associated "<b>User Pattern</b>"
+text box in which the user may specify an SQL pattern match string ("%" matches zero or more
+characters and "_" matches one character) . This will restrict the set of
+users shown in the list. This is intended to make "Manage Users" more practical for sites
+with thousands of registered users. Note that if the text box is left blank, <u>all users</u>
+will be listed (if it ever comes back).
+
+<p>
+<li>
+The "<b>Add User</b>" button has been <b>moved</b> from "Manage Users" up to main administrative user page.
+
+<p>
+<li>
+The "<b>Add Domain</b>" button has been <b>moved</b> from "Manage Domains" up to main administrative user page.
+
+<p>
+<li>
+The "<b>Auto URL</b>" feature is now <b>optional</b>. Allowing Auto URL is likely to result in
+many unnecessary update attempts being sent to the GnuDIP server by users. If this
+option is "off" and an Auto URL update is attempted, the server removes any existing Auto URL
+cookie from the user's browser and presents a web page with an error message.
+
+<p>
+<li>
+A script ("<code>gdipzone.pl</code>") is included to <b>scan the database and</b> generate
+input for <code>nsupdate</code> to <b>reload the zones</b>.
+This could be used to ensure the GnuDIP database and DNS zones stay in agreement. This would
+correct for any mySQL, DNS server or other failures.
+
+<p>
+<li>
+A script ("<code>gdipdlet.pl</code>") is included to <b>scan the database and</b> generate
+input for <code>nsupdate</code> to <b>delete</b> any zone records for
+<b>users whose IP address has not been updated</b> for a specified number of days.
+Optionally, the users are also deleted from the database.
+
+<p>
+<li>
+A script ("<code>gdipdbfix.pl</code>") is included to
+<b>bring the database into a self-consistent state</b> after changes to global
+system settings.
+
+<p>
+<li>
+The installation process has been made less automatic, but at the same time less mysterious and
+easier to customize. The person setting GnuDIP up is given credit for some experience and
+understanding of
+<a href="http://www.tldp.org/">Linux</a>/UNIX. After all, to get GnuDIP running will require an understanding of
+<a href="http://isc.org/products/BIND/">BIND</a> and
+<a href="http://mysql.com/">mySQL</a>.
+
+</ul>
+
+</blockquote>
+<h3>Web Tool End User Enhancements</h3>
+<blockquote>
+
+<p><b>Release 2.3.5++</b>
+<ul>
+
+<li>
+An MX value for a domain served by tinydns must be an IP address, not
+a domain name.
+
+<p><li>
+Removed the "release notes" page from the GUI.
+
+</ul>
+
+<p><b>Release 2.3.5</b>
+<ul>
+
+<li>
+Removed all links to the SourceForge web site.
+
+<p><li>
+The clients can now be downloaded from the "help" page.
+
+</ul>
+
+<p><b>Release 2.3.4</b>
+
+<p><b>Release 2.3.3</b>
+
+<p><b>Release 2.3.2</b>
+
+<p><b>Release 2.3.1</b>
+<ul>
+
+<li>
+Some minor changes were made to the Web interface to better indicate when changes
+have been accepted.
+
+</ul>
+
+<p><b>Release 2.3.0</b>
+<ul>
+
+<li>
+There is now a "<b>Forgotten Password</b>" button on the login page,
+which may be used to obtain a "Quick Login" URL by E-mail.
+
+<p>
+<li>
+There are new pages to support the new "<b>Require and Validate E-mail</b>" system
+preference.
+
+<p>
+<li>
+The "<b>SHOW_DOMAINLIST</b>" preference is now applied only to the login page.
+On all other pages the domain selection list is always shown rather than a text box.
+
+<p>
+<li>
+Pages may "time out" after a period of inactivity, if the GnuDIP administrator
+has configured this behaviour.
+
+<p>
+<li>
+All pages may be embedded within pages customized for the GnuDIP site.
+
+</ul>
+
+<p><b>Release 2.2.0</b>
+<ul>
+
+<li>
+When a user logs in through the main login page, a combination of <b>Javascript and
+a Java applet are used to detect the IP address</b> of the computer running the browser.
+This allows the true IP address to be detected even if the user is <b>behind a
+proxy</b> of some sort, or on a private network.
+
+<p>
+<li>
+There is now a "<b>Delete Current User</b>" option, which allows a user to delete their own
+user entry from the system.
+
+<p>
+<li>
+There is now a "<b>Self Register</b>" button on the login page, if self registration is
+enabled. This removes the need for a separate URL for self registration.
+
+<p>
+<li>
+There is now a "<b>Set Quick Login URL</b>" button on the user options page,
+which may be used to create a Netscape Bookmark or Internet Explorer Favourite,
+or when using Netscape or Internet Explorer under Windows, a Windows Desktop
+Shortcut by right-clicking on a link. The URL will take a user directly to the GnuDIP
+user options page, where they can update their IP address.
+
+<p>
+<li>
+A user may now select the option to have a <b>wildcard DNS CNAME zone record</b> for their domain.
+So for example they may put "<code>www.</code>" in front of their domain name and have this
+resolve to the same IP address.
+<p>
+The GnuDIP administrator must enable this option. The option may enabled
+<b>globally or on a per-user basis</b>.
+
+<p>
+<li>
+A user may now specify a domain to use as a <b>mail exchanger on a DNS MX zone record</b>.
+Mail Transfer Agents (MTA-s) will send E-mail for the user's domain to the mail exchanger domain
+host rather than the user's domain host. The user must make arrangements for the mail to be
+accepted there.
+<p>
+The GnuDIP administrator must enable this option. The option may enabled
+<b>globally or on a per-user basis</b>.
+
+<p>
+<li>
+A user may specify that the <b>mail exchanger is only for backup</b> use. Another MX record with
+higher priority pointing at the user's domain host will be added. MTA-s will attempt to use the
+higher priority MX record first. If the user's domain host does not respond, the MTA will send to
+the mail exchanger host.
+
+</ul>
+
+</blockquote>
+<h3>Client and Update Server Enhancements</h3>
+<blockquote>
+
+<p><b>Release 2.3.5++</b>
+<ul>
+
+<li>
+Bug fixes and minor upgrades - without bumping the release number!
+
+</ul>
+
+<p><b>Release 2.3.5</b>
+
+<p><b>Release 2.3.4</b>
+<ul>
+
+<li>
+Bug fixes and improvements to the code base.
+
+<p><li>
+Added support for Client-Server updates using an HTTP adaptation
+of the update protocol.
+
+</ul>
+
+<p><b>Release 2.3.3</b>
+<ul>
+
+<li>
+The command invoked when an address for a dynamic domain name
+changes is passed all IP addresses the client has validated as arguments.
+
+<p><li>
+The client can invoke a command to supply the address to be registered.
+This provides an alternative to the client detecting the address at its end
+of the connection, or the server detecting the connection at the other end of
+its connection. A sample Perl script to use SNMP/MIB-2 to query an NAT gateway
+for its "external" address is provided.
+
+</ul>
+
+<p><b>Release 2.3.2</b>
+<ul>
+
+<li>
+The client uses UDP rather than TCP for validating IP addresses.
+
+<p><li>
+The default timeout of 1 second for the arrival of address validation
+packets can be overridden to any value.
+
+<p><li>
+The client only validates an address once.
+
+<p><li>
+The client and update server support operation behind NAT/IP masquerade boxes.
+The client will send and receive on specified ports for address validation.
+The update server returns the IP address to the client.
+
+<p><li>
+The client can run continually (in "daemon" mode), checking the address
+for validity at a specified interval. This interval can be any value, not just
+multiples of 1 minute, as for <code>cron</code> or Windows Task Scheduler.
+
+<p><li>
+The client can invoke a command when an address for a dynamic domain name
+changes. This command could be used for example to reconfigure and
+reload a DNS server on the client machine.
+
+</ul>
+
+<p><b>Release 2.3.1</b>
+
+<p><b>Release 2.3.0</b>
+<ul>
+
+<li>
+Several bugs and operational problems were fixed. 
+
+</ul>
+
+<p><b>Release 2.2.0</b>
+<ul>
+
+<li>
+<b>The client passes the IP address it detects at its end of the connection</b> to the
+server. The server will use the address passed instead of the IP address of the
+computer that connected to the server. If no address is passed, the IP address of the
+computer that connected to the server will be used, so that <b>old clients may still be
+used</b>. This allows the true IP address to be detected even if the client is <b>behind a
+proxy</b> of some sort, or on a private network.
+
+<p>
+<li>
+The client now maintains the information for
+<b>several GnuDIP domains in the same configuration file</b>.
+Using "<code>gdipc.pl -c</code>" will replace any existing entry. To list the entries or
+delete an entry the user must use a text editor. There is one line per GnuDIP domain. 
+
+<p>
+There is also a new script, <code>encpass.pl</code>, which takes its plain text password argument
+and prints the encrypted version. This script faciliates manual modification of the configuration
+file.
+
+<p>
+<li>
+The format of the lines in the configuration file has changed. This is partly for
+<b>compatibility with Windows file names</b>. This is a sample configuration file:
+
+<pre>
+tester;gnudip;localhost;f5d1278e8109edd94e1e4197e04873b9;/root/.GnuDIP2.cache.tester.gnudip;0;60
+tester2;gnudip;localhost;179ad45c6ce2cb97cf1029e212046e81;/root/.GnuDIP2.cache.tester2.gnudip;0;2073600
+</pre>
+
+<p>
+<li>
+The client now <b>endeavors not to abuse a GnuDIP server</b>,
+and maintains a <b>cache file for each GnuDIP domain</b>
+towards this end. This is reflected in the user interface, of which this is a sample:
+
+<pre>
+# gdipc.pl -c
+Configuration file name: /root/.GnuDIP2
+Using Update Configuration Mode
+Username: tester2
+Domain: gnudip
+GnuDIP Server: localhost
+Password: testpass
+Cache File [/root/.GnuDIP2.cache.tester2.gnudip]:
+Minimum Seconds Between Updates [0]:
+Maximum Seconds Between Updates [2073600]:
+</pre>
+
+This is a sample update run:
+
+<pre>
+# gdipc.pl
+Configuration file name: /root/.GnuDIP2
+Cache file name: /root/.GnuDIP2.cache.tester.gnudip
+No update done for tester.gnudip - 127.0.0.1 still valid
+Cache file name: /root/.GnuDIP2.cache.tester2.gnudip
+Invalid login attempt for tester2.gnudip
+</pre>
+
+The IP address for <code>tester.gnudip</code> was
+<b>not updated because the IP address at the time of the last update was still valid</b>,
+and because "<b>Maximum Seconds Between Updates</b>" had not yet expired.
+
+<p>
+This is the contents of <code>/root/.GnuDIP2.cache.tester.gnudip</code>:
+
+<pre>
+127.0.0.1;990991068
+</pre>
+
+The status of a GnuDIP2 domain may be reset by deleting its cache file.
+
+<p>
+If "<b>Minimum Seconds Between Updates</b>" is specified, then an update will not be sent to
+the server more often than this interval, even if the IP address at the time of the last
+update is no longer valid.
+
+<p>
+<li>
+The "help" has been slightly enhanced:
+
+<pre>
+# gdipc.pl -h
+usage: gdipc.pl \
+usage:     [ -h | -v | -i [ -r] | [ -f configfile ] [ -c | -r ] \
+usage:     [ -o outfile | -a appendfile ]
+usage: With no arguments, update server if address changed or time expired.
+usage: -h: Print this usage message.
+usage: -v: Show version information
+usage: -i: Prompt and read standard input rather than a configuration file.
+usage: -f: Specify a particular configuration file.
+usage:     This will otherwise be .GNUDIP2 in the directory specified by
+usage:     the HOME environment variable, or gdipc.conf in the directory
+usage:     of the binary if HOME is not set.
+usage: -c: Specify contents to write to configuration file.
+usage: -r: Send an offline request to the server to remove your DNS hostname.
+usage: -o: Specify file to overwrite with all output from script.
+usage: -a: Specify file to append with all output from script.
+</pre>
+
+<p>
+<li>
+The client works with <b>Windows</b> if
+<a href="http://aspn.activestate.com/ASPN/Downloads/ActivePerl/">ActivePerl</a>
+is installed.
+It is converted to a <code>.bat</code> for convenience.
+It is even possible to run it an regular intervals
+using the Windows task scheduler without console (i.e. DOS) windows popping up,
+using the <code>wperl.exe</code> program file.
+
+<p>
+The Windows client package contains HTML documentation on using the client with Windows.
+
+</ul>
+
+</blockquote>
+
+<p><hr>
+
+</body>
+
+</html>
+

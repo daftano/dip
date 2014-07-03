@@ -1,0 +1,68 @@
+
+# commands to create database for GnuDIP 2.3
+ 
+######################################
+# create GnuDIP database
+#
+create database gnudip2;
+#               ^ GnuDIP database
+
+######################################
+# grant access to GnuDIP database tables to GnuDIP user
+# the gnudip user will be created if needed
+
+grant select, insert, update, delete on gnudip2.* to gnudip           identified by 'gnudippass';
+grant select, insert, update, delete on gnudip2.* to gnudip@localhost identified by 'gnudippass';
+#                                                    ^ GnuDIP user                   ^ GnuDIP password
+
+######################################
+# use GnuDIP database
+
+use gnudip2;
+
+######################################
+# domains
+
+create table domains (
+  id int(10) default '0' not null auto_increment,
+  domain varchar(50),
+  changepass varchar(5),
+  addself varchar(5),
+  primary key (id)
+);
+
+######################################
+# globalprefs
+
+create table globalprefs (
+  id int(10) default '0' not null auto_increment,
+  param varchar(30),
+  value varchar(255),
+  primary key (id)
+);
+
+######################################
+# users
+
+create table users (
+  id         int(10) default '0' not null auto_increment,
+  username   varchar(20) default '' not null,
+  password   varchar(32),
+  domain     varchar(50) default '' not null,
+  email      varchar(50),
+  createdate datetime,
+  forwardurl varchar(60),
+  updated    datetime,
+  level      enum('USER','ADMIN') default 'USER' not null,
+  currentip  varchar(15),
+  autourlon  varchar(5),
+  MXvalue    varchar(60),
+  MXbackup   enum('YES','NO') default 'NO' not null,
+  wildcard   enum('YES','NO') default 'NO' not null,
+  allowwild  enum('YES','NO') default 'NO' not null,
+  allowmx    enum('YES','NO') default 'NO' not null,
+  primary key (id),
+  key domain (domain),
+  key username (username)
+);
+

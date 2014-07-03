@@ -1,0 +1,341 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+GnuDIP Release 2.3.5 - Windows Client Script
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body bgcolor=white>
+
+<table><tr valign=middle><td>
+<img align=middle src="gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+</td><td>
+<h1>GnuDIP Release 2.3.5 - Windows Client Script</h1>
+</table>
+
+<hr>
+
+<p>
+With this client you can have your IP address updated automatically at
+several GnuDIP sites simultaneously. This client will only send an update
+to the GnuDIP servers if the IP address at the time of the last update
+is no longer valid, or enough time has expired. The validity of the old
+address is determined without generating any network traffic.
+
+<p>
+The <code>gdipc.bat</code> script serves as the GnuDIP client.
+The <code>encpass.bat</code> is also described below. These scripts are simultaneously
+Perl scripts and Windows <code>bat</code> files.
+
+<p>
+We assume from here on that you have installed
+this Windows client in <u><code>C:\gdipc</code></u>.
+
+<p>
+We also assume that you chose to have <code>C:\gdipc</code> listed in your
+<u><code>%PATH%</code></u> environment variable during the installation of this client
+software. Thus you should be able to run <code>gdipc.bat</code> at the command prompt
+like this:
+
+<blockquote><pre>
+C:\>gdipc -c
+</pre></blockquote>
+
+Otherwise at the command prompt you will have to use:
+
+<blockquote><pre>
+C:\>C:\gdipc\gdipc.bat -c
+</pre></blockquote>
+
+<p>
+As a convenience, you may also run <code>gdipc -c</code> by simply opening
+(e.g. <b>double-clicking</b>) the file <b><code>C:\gdipc\config.bat</code></b>. 
+
+<p>
+The client's features include:
+
+<ul>
+<li>
+The client maintains the information for several GnuDIP domains in the same configuration
+file. Using "<code>gdipc -c</code>" will replace any existing entry.
+To list the entries or
+delete an entry the user must use a text editor. There is one line per GnuDIP domain. 
+
+<p>
+The script <code>encpass.bat</code> takes its plain text password argument
+and prints the encrypted version. This script faciliates manual modification of the configuration
+file.
+
+<p>
+<li>
+The format of the lines in the configuration file is demonstrated by this
+sample configuration file:
+
+<pre>
+tester;gnudip;gateway;f5d1278e8109edd94e1e4197e04873b9;C:/GDIPC/gdipc.cache.tester.gnudip.txt;0;2073600
+tester2;gnudip;gateway;f5d1278e8109edd94e1e4197e04873b9;C:/GDIPC/gdipc.cache.tester2.gnudip.txt;0;2073600
+</pre>
+
+<p>
+<li>
+The client tries not to abuse a GnuDIP server, and maintains a cache file for each GnuDIP
+domain towards this end. This is reflected in the user interface, of which this is a sample:
+
+<pre>
+C:\>gdipc -c
+Using Update Configuration Mode
+Configuration file name: C:/GDIPC/gdipc.conf.txt
+Username: tester
+Domain: gnudip
+Connect by direct TCP (d) or web server (w) [d]:
+GnuDIP Server - host[:port]: gateway
+Password: tester
+Cache File [C:/GDIPC/gdipc.cache.tester.gnudip.txt]:
+Minimum Seconds Between Updates [0]:
+Maximum Seconds Between Updates [2073600]:
+</pre>
+
+This is a sample update run:
+
+<pre>
+C:\>gdipc
+====  gdipc.pl running:  Mon Jun  4 17:59:19 2001  ====
+Configuration file name: C:/GDIPC/gdipc.conf.txt
+Cache file name: C:/GDIPC/gdipc.cache.tester.gnudip.txt
+No update done for tester.gnudip - 192.168.0.4 still valid
+Cache file name: C:/GDIPC/gdipc.cache.tester2.gnudip.txt
+Invalid login attempt for tester2.gnudip
+</pre>
+
+The IP address for <code>tester.gnudip</code> was not updated because the IP address
+at the time of the last update is still valid, and because
+"Maximum Seconds Between Updates" had not yet expired.
+
+<p>
+This is the contents of <code>C:\GDIPC\gdipc.cache.tester.gnudip</code>:
+
+<pre>
+192.168.0.4;991699066
+</pre>
+
+The status of a GnuDIP domain may be reset by deleting its cache file.
+
+<p>
+If "Minimum Seconds Between Updates" is specified, then an update will not be sent to
+the server more often than this interval, even if the IP address at the time of the last
+update is no longer valid.
+
+<p>
+<li>
+The "help" printed by the script is as follows:
+
+<pre>
+C:\>gdipc -h
+usage: gdipc.bat \
+usage:   { -h | -v | -i [ -r] | [ -f configfile ] [ -c | -r | \
+usage:       [ -o outfile | -a appendfile | -l logfile ] \
+usage:       [ -g sendport:recvport ] [ -d repeatseconds] \
+usage:       [ -w waitseconds] [ -q "addressquerycommand" ] ] \
+usage:       [ -x "addresschangedcommand" ] }
+usage: With no arguments, update server if address changed or time
+usage: expired.
+usage: -h: Print this usage message.
+usage: -v: Show version information.
+usage: -i: Prompt and read standard input rather than a configuration
+usage:     file.
+usage: -f: Specify a particular configuration file.
+usage:     This will otherwise be .GnuDIP2.txt in the directory
+usage:     specified by the HOME environment variable, or gdipc.conf.txt
+usage:     in the directory of the binary if HOME is not set.
+usage: -c: Specify contents to write to configuration file.
+usage: -r: Send an offline request to the server to remove your DNS hostname.
+usage: -d: Run as a daemon. Perform client action immediately and then every
+usage:     "repeatseconds" seconds.
+usage: -o: Specify log file to overwrite on each run with output from script.
+usage: -a: Specify log file to append on each run with all output from script.
+usage: -l: Specify log file for daemon mode. Overwrite on first run, then
+usage:     append.
+usage: -w: Timeout in seconds when waiting for address validation packet.
+usage:     Defaults to 1 second. Decimal point and fraction (e.g. "0.5") is
+usage:     allowed.
+usage: -g: Client is behind a gateway. Request GnuDIP server to register
+usage:     address it sees connection from, and pass it back in response.
+usage:     Specify port to send address validation packet to and port gateway
+usage:     will forward it to.
+usage: -q: Command to invoke to determine IP address to report to GnuDIP
+usage:     server. Command must write address to standard output. When used
+usage:     with -g, address is sent to server.
+usage: -x: Command to invoke if address changed. This command can be used to
+usage:     to take any actions required when the address changes. All
+usage:     validated addresses are passed as arguments.
+</pre>
+
+<p><li>
+If your internet connection is established at system start up (as for example with
+DHCP), you will want to run <code>gdipc.bat</code> at system startup, using the
+"Windows Task Scheduler" ("Scheduled Tasks" in "My Computer" - see
+<a href="http://support.microsoft.com/support/kb/articles/q178/7/06.asp">
+http://support.microsoft.com/support/kb/articles/q178/7/06.asp</a>).
+
+<p>
+On the author's version of Windows 98 this goes like this:
+
+<p>
+<ol>
+<li>Double-click "My Computer", and then double-click "Scheduled Tasks".
+<li>Double-click "Add Scheduled Task", and then click "Next". 
+<li>Click "Browse".
+<li>Locate and select the <code>gdipc.bat</code> file, as a temporary measure.
+<li>Click "Open".
+<li>Provide a name for the entry - perhaps "gdipc at start up".
+<li>Select the "When my computer starts" radio box.
+<li>Click "Next".
+<li>Select the "Open advanced properties ..." option box.
+<li>Click "Finish".
+<li>Type the real command line (see below) into the "Run" text box.
+<li>Click "OK".
+</ol>
+
+<p>
+According to the Microsoft Web site:
+
+<blockquote>
+NOTE: To use Task Scheduler, you must log on to the computer with a valid user account.
+</blockquote>
+
+
+<p>
+The command line for this could be:
+
+<pre>
+c:\gdipc\gdipc.bat
+</pre>
+
+This would open a console Window for its output, which would disappear after
+<code>gdipc.bat</code> finished.
+
+<p>
+You could capture the output from the run by instead using:
+
+<pre>
+c:\gdipc\gdipc.bat -o c:\gdipc\gdipc_log.txt 
+</pre>
+
+<p>
+The preceding command line would still open a console Window for its output,
+which would disappear after
+<code>gdipc.bat</code> finished. However, nothing would be displayed in the console window.
+To eliminate the console window you could instead use:
+
+<pre>
+c:\gdipc\wperl.exe c:\gdipc\gdipc.bat -o c:\gdipc\gdipc_log.txt
+</pre>
+
+The difference here is the use of the <code>wperl.exe</code> executable instead of
+the <code>perl.exe</code> executable. A console window is created by
+<code>perl.exe</code> but not by <code>wperl.exe</code>.
+
+<p><li>
+If your IP address may change while your system is running, or you use manually
+invoked dial up networking connections, you could have the
+Windows Task Scheduler run this once a minute (or whatever), in addition to 
+running it at system start up. Note however that the
+<code>gdipc_log.txt</code> will be overwritten with each execution of
+<code>gdipc.bat</code>. For this reason, you may want two separate Task Scheduler
+entries - one for execution at start up and a second for the repeating executions.
+For the repeating executions use:
+
+<pre>
+c:\gdipc\wperl.exe c:\gdipc\gdipc.bat -a c:\gdipc\gdipc_log.txt
+</pre>
+
+The difference here is the use of the "<code>-a</code>" option so that output is
+appended to the log for each repeating execution. Note that you should also invoke
+<code>gdipc.bat</code> with the <code>-o</code> option at system start up, or the
+log file will grow indefinitely.
+
+<p>
+Again, on the author's version of Windows 98 the "Scheduled Tasks" part goes like this:
+
+<p>
+<ol>
+<li>Double-click "My Computer", and then double-click "Scheduled Tasks".
+<li>Double-click "Add Scheduled Task", and then click "Next". 
+<li>Click "Browse".
+<li>Locate and select the <code>gdipc.bat</code> file, as a temporary measure.
+<li>Click "Open".
+<li>Provide a name for the entry - perhaps "gdipc repeating".
+<li>Select the "Daily" radio box.
+<li>Click "Next".
+<li>Click "Next" again.
+<li>Select the "Open advanced properties ..." option box.
+<li>Click "Finish".
+<li>Type the real command line (see below) into the "Run" text box.
+<li>Select the "Schedule" tab.
+<li>Click the "Advanced" button.
+<li>Select the "Repeat task" option box.
+<li>Use the "Every" scroll box and list box to set your interval.
+<li>Click "OK".
+<li>Click "OK" again.
+</ol>
+
+<p>
+If your IP address is particularly
+volotile, you should specify a value for "Minimum Seconds Between Updates" of
+1800 (30 minutes) or so, to give the GnuDIP server a break.
+
+<p><li>
+If you want to have the address validation done more often than once per minute,
+and are willing to leave the GnuDIP client running continually, you could instead
+schedule the client at system startup using a command line like this:
+
+<pre>
+c:\gdipc\wperl.exe c:\gdipc\gdipc.bat -d 30 -l c:\gdipc\gdipc_log.txt
+</pre>
+
+<p><li>
+If you have an internal network with a <b>Network Address Transalation/IP Masquerading
+gateway</b> providing access to and from the public Internet, and you want to register
+the external IP address of the NAT box with the GnuDIP server, you may want to run the
+client on an internal machine. If the gateway is a closed proprietary device, you will
+have to run the client on an internal machine. 
+
+<p>
+The client normally sends the address it detects at its end of the connection to
+the server in the update request to the server, and the server registers this
+address. It also remembers this address, and tests whether it is valid by sending
+a UDP packet to a randomly selected port at this address. The client then waits
+a short interval to receive this packet. If it is not received the IP address
+is assumed to have changed, and an update is sent to the GnuDIP server.
+
+<p>
+To run behind an NAT box, the client needs to know the external address of the NAT box
+and must be able to check whether that address has changed.
+
+<p>
+You must configure the NAT box to redirect some external UDP port to a UDP port on
+the internal machine running the client. You provide these port numbers to the
+client using the <code>-g</code> option. This option will
+also cause the client to request the GnuDIP server to send the external
+address of the NAT device (which the server sees as the other end of the client connection)
+back in the reply to the update request. You must ensure that the GnuDIP servers you use
+are at release 2.3.2 or later in order for this request to succeed.
+
+</ul>
+
+<p><hr>
+
+</body>
+
+</html>
+

@@ -1,0 +1,29 @@
+
+# commands for the first step to upgrade GnuDIP database to 2.3
+
+######################################
+# use GnuDIP database
+
+use gnudip2;
+#   ^ GnuDIP database
+
+######################################
+# queue
+
+drop table queue;
+
+######################################
+# domains
+
+alter table domains drop column zonefile;
+alter table domains drop column zonetype;
+
+######################################
+# users
+
+alter table users add column MXvalue   varchar(60);
+alter table users add column MXbackup  enum('YES','NO') default 'NO' not null;
+alter table users add column wildcard  enum('YES','NO') default 'NO' not null;
+alter table users add column allowwild enum('YES','NO') default 'NO' not null;
+alter table users add column allowmx   enum('YES','NO') default 'NO' not null;
+

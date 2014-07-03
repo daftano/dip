@@ -1,0 +1,325 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+GnuDIP Client-Server Update Protocol
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body bgcolor=white>
+
+<table><tr valign=middle><td>
+<img align=middle src="gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+</td><td>
+<h1>GnuDIP Client-Server Update Protocol</h1>
+</table>
+
+<p><hr>
+
+<p>
+There are in fact two update protocols. The original
+protocol involves a direct TCP connection by the client to the server.
+There is also an adaptation of the original protocol
+to HTTP (web server protocol). The HTTP protocol is more convenient for
+authors of generic Windows dynamic DNS update clients, such as
+<a href="http://www.noeld.com/dldynsite.htm">DynSite</a>.
+
+<p>
+<b>
+With either of these protocols it is not possible for wire tappers
+to determine the clear text password, nor is it possible for them to
+"spoof" the update server using captured and modified update messages.
+</b>
+
+<p><hr>
+
+<h2><u>
+The Original Direct TCP Connection Protocol
+</u></h2>
+
+<p>
+ASCII is (of course) used for representing printable characters.
+
+<p>
+The client makes a TCP connection to the appropriate port on the server host.
+This port is normally 3495, but a GnuDIP site could choose another port.
+
+<p>
+As soon as the connection is established the server will send a randomly
+generated 10 character "salt" string. This is used in the following algorithm for
+hashing the password:
+
+<ul>
+
+<li>
+Digest the user's password using
+<a href="http://www.ietf.org/rfc/rfc1321.txt">
+the MD5 digest message digest algorithm</a>.
+Convert the digest value (which is a <u>binary</u> value)
+to its hexadecimal character string representation
+(characters 0-9 and lower case a-f).
+
+<p><li>
+Append a period (".") and the salt value to create a longer character string.
+
+<p><li>
+Digest this longer character string and convert it to its hexadecimal
+character representation.
+
+</ul>
+
+<p>
+The update message character string is then transmited to the GnuDIP server.
+This must be in one of these forms:
+
+<ul>
+
+<li>
+<code>
+user_name:hashed_password:domain:0:address
+</code>
+
+<p>
+This requests that the IP address provided be registered as the (only) address
+for FQDN <code>user_name.domain</code>.
+
+<p>
+In the most common case, the client would pass the address it detects at its end
+of the connection.
+
+<p>
+By default, for compatibility with earlier releases of GnuDIP, the GnuDIP server
+will allow the IP adddress to be omitted. If the IP address is not provided,
+the server writes a notice to the log, and the IP address the server detects at
+the other end of the connection is registered instead.
+Note that these two addresses will be the same unless the client is behind some
+sort of proxy. However a site operator
+may choose to override this backwards compatibility, in order to discourage the
+use of old clients.
+<p>
+In response to this message, the server will return one of:
+
+<ul>
+<li>
+<code>1</code>
+
+<p>
+This indicates an invalid login.
+
+<p><li>
+<code>0</code>
+
+<p>
+This indicates a successful update.
+
+</ul>
+
+<p><li>
+<code>
+user_name:hashed_password:domain:1
+</code>
+
+<p>
+This requests that any IP address currently registered for FQDN
+<code>user_name.domain</code> be removed ("offline" request). The FQDN <code>user_name.domain</code>
+will no longer correspond to any IP address.
+
+<p>
+In response to this message, the server will return one of:
+
+<ul>
+<li>
+<code>1</code>
+
+<p>
+This indicates an invalid login.
+
+<p><li>
+<code>2</code>
+
+<p>
+This indicates a successful offline.
+
+</ul>
+
+<p><li>
+<code>
+user_name:hashed_password:domain:2
+</code>
+
+<p>
+This requests that the server determine the IP address it sees at the client end
+of the connection, and register that as the (only) address for FQDN
+<code>user_name.domain</code>. This IP address will also be returned
+to the client.
+
+<p>
+In response to this message, the server will return one of:
+
+<ul>
+<li>
+<code>1</code>
+
+<p>
+This indicates an invalid login.
+
+<p><li>
+<code>0:address</code>
+
+<p>
+This indicates a successful update and provides the address that was registered.
+
+</ul>
+
+</ul>
+
+<p><hr>
+
+<h2><u>
+The HTTP Based Protocol
+</u></h2>
+
+<p>
+The HTTP version of the protocol requires the client issue an HTTP
+GET request, parse the response, use MD5 to obscure the password,
+issue a second HTTP GET request and parse that response. We first
+give a conceptual overview, then a concrete example.
+
+<p>
+If a GnuDIP site operator follows the default installation procedure,
+the path part of the URL (the part after the host name) for the HTTP
+update server CGI script will be
+<code>/gnudip/cgi-bin/gdipupdt.cgi</code>.
+
+<p>
+In the first HTTP GET request, no query string (the part of an URL
+after the "?") is provided. It is interpreted as
+a "request for a salt". The response contains three pieces of
+data:
+
+<ol>
+<li>a randomly generated 10 character "salt" string
+<li>a "time salt generated" value
+<li>a "signature"
+</ol>
+
+These values are passed in <u>HTML meta tags</u>, as in this example:
+
+<blockquote><pre>
+&lt;meta name="salt" content="XLCDgXvzSo"&gt;
+&lt;meta name="time" content="1002164730"&gt;
+&lt;meta name="sign" content="8278f108c83d822048ce0375bede5c15"&gt;
+</pre></blockquote>
+
+Each meta tag will be on its own line and left justified on the line.
+The white space gaps before "name=" and "content=" will each consist
+of a single space.
+The tags will be in the order shown. There will be no other HTML meta
+tags in the response.
+
+<p>
+The salt is used in the following algorithm for hashing the password:
+
+<ul>
+
+<li>
+Digest the user's password using
+<a href="http://www.ietf.org/rfc/rfc1321.txt">
+the MD5 digest message digest algorithm</a>.
+Convert the digest value (which is a <u>binary</u> value)
+to its hexadecimal character string representation
+(characters 0-9 and lower case a-f).
+
+<p><li>
+Append a period (".") and the salt value to create a longer character string.
+
+<p><li>
+Digest this longer character string and convert it to its hexadecimal
+character representation.
+
+</ul>
+
+<p>
+Now the second HTTP GET request is issued. In this request the query string
+(the part of an URL after the "?") contains the following parameters:
+
+<ol>
+<li>the "salt" from the first response ("salt=")
+<li>the "time salt generated" value from the first response ("time=")
+<li>the "signature" from the first response ("sign=")
+<li>the GnuDIP user name ("user=")
+<li>the GnuDIP domain name ("domn=")
+<li>the MD5 digested password created above ("pass=")
+<li>the server "request code" ("reqc="):
+  <ul>
+  <li>"0" - register the address passed with this request
+  <li>"1" - go offline
+  <li>"2" - register the address you see me at, and pass it back to me
+  </ul>
+<li>the IP address to be registered, if the request code is "0" ("addr=")
+</ol>
+
+A request with a request code of "0" and an address of "0.0.0.0" will be treated
+as an offline request.
+
+<p>
+This is an example of a query string:
+
+<blockquote><pre>
+salt=XLCDgXvzSo&amp;time=1002164730&amp;sign=8278f108c83d822048ce0375bede5c15&amp;user=gnudip&amp;pass=305dff8b78e694a02eafb0c19e48292f&amp;domn=dyn.mpis.net&amp;reqc=0&amp;addr=192.168.0.4
+</pre></blockquote>
+
+<p>
+The response to the second request contains:
+
+<ol>
+<li>the return code
+  <ul>
+  <li>"0" - successful update
+  <li>"1" - invalid login (or other problem)
+  <li>"2" - successful offline
+  </ul>
+<li>the IP address that the server registered, for request code "2"
+</ol>
+
+These values are again passed in <u>HTML meta tags</u>, as in this example:
+
+<blockquote><pre>
+&lt;meta name="retc" content="0"&gt;
+&lt;meta name="addr" content="24.81.172.128"&gt;
+</pre></blockquote>
+
+Each meta tag will be on its own line and left justified on the line.
+The white space gaps before "name=" and "content=" will each consist
+of a single space.
+The tags will be in the order shown. There will be no other HTML meta
+tags in the response.
+
+<p>
+This protocol allows the GnuDIP server to "time out" the prompt. If the
+response does not come within 60 seconds (for example), it would be
+denied. The signature is generated using a key known only to the
+server. This allows the server to know that the "salt" and "time
+generated" value are valid, without having to maintain state
+information on the server side.
+
+<p>
+There is a transcript of three actual protocol exchanges (done using the
+Perl GnuDIP client) in
+<a href="protocol_sample.txt">protocol_sample.txt</a>.
+
+<p><hr>
+
+</body>
+
+</html>
+

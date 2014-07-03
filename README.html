@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+GnuDIP Release 2.3.5 - README File
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body bgcolor=white>
+
+<table><tr valign=middle><td>
+<img align=middle src="gnudip/html/gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+</td><td>
+<h1>GnuDIP Release 2.3.5 - README File</h1>
+</table>
+
+<hr>
+
+<p>
+This is GnuDIP Release 2.3.5.
+
+<p>
+The GnuDIP software implements a Dynamic IP DNS service.
+It provides clients with a static DNS name even if
+their IP address is dynamically assigned.
+
+<p>
+GnuDIP is written in
+<a href="http://www.perl.com/">Perl</a>.
+
+<p>
+GnuDIP has two main parts on the server side:
+<ul>
+<li>
+a daemon that listens for client requests and
+<li>
+a web interface that is used as the administration tool
+and as the user's tool to manage their own account.
+</ul>
+
+<p>
+A client which works with both Linux/UNIX and Windows is also provided.
+
+<p>
+GnuDIP is released under the GPL. Please see the file
+<a href="COPYING"><code>COPYING</code></a>
+included in this distribution for more information.
+
+<p><hr>
+
+<p>
+The client Perl script, for Linux/UNIX, may be found in the directory:
+
+<blockquote> 
+<a href="gnudip/client/UNIX/">gnudip/client/UNIX/</a>. 
+</blockquote>
+
+<p>
+The directory above has a tar ball for the latest release, and a 
+directory which is just the unpacked tar ball which you can browse 
+through. 
+
+<p>
+Using the client with Linux/UNIX is described in the file
+<a href="gnudip/client/UNIX/gdipc/CLIENT.html"><code>gnudip/client/UNIX/gdipc/CLIENT.html</code></a>.
+
+<p>
+The same client Perl script, but with minor changes to adapt it to the
+Windows environment, may be found in the directory:
+
+<blockquote> 
+<a href="gnudip/client/Windows/">gnudip/client/Windows/</a>. 
+</blockquote>
+
+<p>
+The directory above has a Windows self-extracting zip executable file
+and a directory which is just the expanded zip file which you can browse 
+through. 
+
+<p>
+To use this software you must first install 
+<a href="http://aspn.activestate.com/ASPN/Downloads/ActivePerl/">ActivePerl</a>. 
+This software is a free port of Perl to Windows
+
+<p>
+Using the client with Windows is described in the file
+<a href="gnudip/client/Windows/gdipc/CLIENT.html"><code>gnudip/client/Windows/gdipc/CLIENT.html</code></a>.
+
+<p>
+A version of the Windows client package containing enough files from ActivePerl
+to run stand alone may be found in the directory:
+
+<blockquote> 
+<a href="gnudip/client/Windows_standalone/">gnudip/client/Windows_standalone/</a>. 
+</blockquote>
+
+<p><hr>
+
+<p>
+More specifically, the requirements are:
+<ul>
+<li>
+<a href="http://www.perl.com/pub/a/language/info/software.html">
+the base Perl Language system</a>
+<li>
+the <code>nsupdate</code> command from either 
+<a href="http://isc.org/products/BIND/bind8.html">BIND 8</a>
+or
+<a href="http://isc.org/products/BIND/bind9.html">BIND 9</a>
+<li>
+the <code>sendmail</code> command from
+<a href="http://www.sendmail.org/">Sendmail</a>
+or the clone program provided by Sendmail replacements such as
+<a href="http://www.exim.org/">Exim</a>,
+<a href="http://qmail.org/">qmail</a> or
+<a href="http://www.postfix.org/">Postfix</a>.
+</ul>
+
+<p>
+More specifically you need Perl version 5.6.0 or later. You can use Perl
+5.005 if you are prepared to install a "dummy" <code>warnings.pm</code>
+file. This is explained in
+<a href="INSTALL.html"><code>INSTALL.html</code></a>.
+
+<p>
+To use secret key rather than IP address access control for dynamic DNS
+you may also want the <code>dnskeygen</code> command from BIND 8 or the
+<code>dnssec-keygen</code> command from BIND 9, to generate input files for nsupdate,
+and probably the key values in them.
+
+<p>
+Although not required, GnuDIP will run a bit faster if you install
+<a href="http://search.cpan.org/search?dist=Digest-MD5">
+the Perl Digest-MD5 module</a>.
+
+<p>
+In order to use <a href="http://mysql.com/">MySQL</a>
+rather than the Linux/UNIX file system for Web Tool
+configuration and user information, you will also need:
+<ul> 
+<li>
+<a href="http://mysql.com/downloads/mysql.html">
+the MySQL database management software</a>
+<li>
+<a href="http://search.cpan.org/search?module=DBI">
+the Perl DBI module</a>
+<li>
+<a href="http://search.cpan.org/search?module=DBD::mysql">
+the DBI MySQL driver</a>
+</ul>
+
+<p>
+In order to use <a href="http://postgresql.com/">PostreSQL</a>
+rather than the Linux/UNIX file system for Web Tool
+configuration and user information, you will also need:
+<ul> 
+<li>
+<a href="http://www.postgresql.com/mirrors-ftp.html">
+the PostreSQL database management software</a>
+<li>
+<a href="http://search.cpan.org/search?module=DBI">
+the Perl DBI module</a>
+<li>
+<a href="http://gborg.postgresql.org/project/dbdpg/projdisplay.php">
+the DBI PostgreSQL driver</a>
+</ul>
+
+<p>
+If you have
+<a href="http://www.kernel.org/">Linux</a>,
+<a href="http://openbsd.org/">OpenBSD</a>
+or such, Perl (including the DBI module), BIND and Sendmail will
+probably be available as options from your installation CD. You may
+need to obtain and install the rest.
+
+<p>
+Read <a href="INSTALL.html"><code>INSTALL.html</code></a> for instructions on
+installing GnuDIP.
+
+<p><hr>
+
+<p>
+Changes since Release 2.1.2 are discussed in the file
+<a href="release.html"><code>release.html</code></a>.
+
+<p><hr>
+
+<p>
+The protocol used between the client and the update server is described in the
+file <a href="gnudip/html/protocol.html">gnudip/html/protocol.html</a>.
+
+<p><hr>
+
+<p>
+This package includes a bare bones version of GnuDIP with no database
+or web tool. There is a <u>single configuration file</u>, which includes the list
+of host names and their passwords.
+
+<p><hr>
+
+</body>
+
+</html>
+

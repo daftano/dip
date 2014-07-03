@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+GnuDIP Release 2.3.5++ - Overview for End Users
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body bgcolor=white>
+
+<table><tr valign=middle><td>
+<img align=middle src="gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+</td><td>
+<h1>GnuDIP Release 2.3.5++ - Overview for End Users</h1>
+</table>
+
+<hr>
+
+<p>
+This is release 2.3.5++ of the GnuDIP Web Interface.
+
+<p>
+The GnuDIP software implements a Dynamic IP DNS service.
+It provides clients with a static DNS name even if
+their IP address is dynamically assigned.
+
+<p>
+At the time of writing, this software may be obtained from
+<a href="http://gnudip2.sourceforge.net/">SourceForge</a>.
+
+<p><hr>
+
+<blockquote>
+<p>
+For the most part, the GnuDIP Web Interface is self-explanatory. Only a few
+points are discussed here.
+</blockquote>
+
+<h3>The "Login" Page</h3>
+
+<blockquote>
+<p>
+If there is no "Self Register" button, the site operator has chosen not to
+provide this capability.
+</blockquote>
+
+<h3>The "Self Registration" Page</h3>
+
+<blockquote>
+<p>
+A GnuDIP site may provide an alternative "Self Registration"
+page. The following description is for the standard GnuDIP page.
+<p>
+You must choose a domain from the list. The host name you enter will
+be within that domain. Your fully qualified domain name (FQDN)
+will be "Hostname.Domain".
+</blockquote>
+
+<h3>The "User Options" Page</h3>
+
+<blockquote>
+<p>
+The button labeled "Set Quick Login URL" can be used to
+create a new Internet Explorer "favorite", Netscape "bookmark" or
+Windows "desktop short cut icon" that will allow you to go directly to the
+User Options page without logging in to the GnuDIP Web Interface.
+</blockquote>
+
+<h3>The "Current Settings" Page</h3>
+
+<blockquote>
+
+<blockquote>
+<p>
+If any of the three items below are not present, the site operator has
+chosen not to provide this capability.
+</blockquote>
+
+<dl>
+
+<dt>
+Wild Card
+<dd>
+A user may select the option to have a <b>wildcard DNS CNAME zone record</b> for their domain.
+So for example they may put "<code>www.</code>" in front of their domain name and have this
+resolve to the same IP address.
+
+<p>
+<dt>
+Mail Exchanger
+<dd>
+A user may specify a domain to use as a <b>mail exchanger on a DNS MX zone record</b>.
+Mail Transfer Agents (MTA-s) will send E-mail for the user's domain to the mail exchanger
+domain host rather than the user's domain host. The user must make arrangements for the
+mail to be accepted there.
+
+<p>
+<dt>
+Backup Mail Exchanger
+<dd>
+A user may specify that the <b>mail exchanger is only for backup</b> use. Another MX record with
+higher priority pointing at the user's domain host will be added. MTA-s will attempt to use the
+higher priority MX record first. If the user's domain host does not respond, the MTA will send to
+the mail exchanger host.
+
+</dl>
+</blockquote>
+
+<p><hr>
+
+<h3> 
+Having Your Own Domain Name with a Dynamic IP Address
+</h3> 
+<blockquote>
+See <a href="owndomain.html">owndomain.html</a>.
+</blockquote>
+
+<p><hr>
+
+<h3>
+GnuDIP Client Software
+</h3>
+<blockquote>
+See <a href="clients.html">clients.html</a>.
+</blockquote>
+
+<p><hr>
+
+</body>
+
+</html>
+

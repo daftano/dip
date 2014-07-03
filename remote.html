@@ -1,0 +1,380 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+GnuDIP Remote User Maintenance Protocol
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body bgcolor=white>
+
+<table><tr valign=middle><td>
+<img align=middle src="gnudip/html/gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+</td><td>
+<h1>GnuDIP Remote User Maintenance Protocol</h1>
+</table>
+
+<hr>
+
+<p>
+Here we describe the remote user maintenance protocol provided by the
+<a href="gnudip/sbin/gdiprmaint.pl"><code>gdiprmaint.pl</code></a>
+(X)INETD daemon, and which is used by the
+<a href="gnudip/sbin/gdiprmclt.pl"><code>gdiprmclt.pl</code></a>
+client script.
+<p><hr>
+
+<p>
+ASCII is (of course) used for representing printable characters.
+
+<p>
+The client makes a TCP connection to the appropriate port on the server host.
+There is no standard port. Each GnuDIP site should choose its own.
+
+<p>
+As soon as the connection is established the server will send a <b>randomly
+generated 10 character "salt" string</b>. The manner in which this is used
+depends on whether the maintenance message is sent in unencrypted or
+encrypted form.
+
+<h3>Unencrypted Form</h3>
+
+<p>
+In this case the maintenance request and response messages are not
+encrypted, but the <b>remote maintenance access password</b> (a value
+known both to the server and the client) is still protected. 
+The random salt is used in this process in a way that prevents the possibility
+of "spoofing" the server by replaying requests.
+
+<p>
+The random salt sent by the server is used in the following algorithm for
+hashing the password:
+
+<ul>
+
+<li>
+Digest the remote maintenance access password using
+<a href="http://www.ietf.org/rfc/rfc1321.txt">
+the MD5 digest message digest algorithm</a>.
+Convert the digest value (which is a <u>binary</u> value)
+to its hexadecimal character string representation
+(characters 0-9 and lower case a-f).
+
+<p><li>
+Append a period (".") and the salt value to create a longer character string.
+
+<p><li>
+Digest this longer character string and convert it to its hexadecimal
+character representation.
+
+</ul>
+
+<p>
+The message character string is then transmited to the GnuDIP server.
+It is sent as several lines using a <b><u>single new line character as the line
+ending</u></b>. The general form is:
+
+<blockquote><pre>
+0
+hashed_password
+maintenance_request_line_1
+maintenance_request_line_2
+   *
+   *
+maintenance_request_line_n
+end
+</pre></blockquote>
+
+<p>
+The response from the server will in most cases be single line containing a
+response code:
+
+<blockquote><pre>
+response_code
+</pre></blockquote>
+
+<p>
+For a response code of zero to a <b><code>get</code></b> request, there will
+also be two or more data lines:
+
+<blockquote><pre>
+0
+get_response_line_1
+get_response_line_2
+   *
+   *
+get_response_line_n
+end
+</pre></blockquote>
+
+<p>
+The format of maintenance requests and responses to a "get" is explained
+below, along with the possible response codes.
+
+<h3>Encrypted Form</h3>
+
+<p>
+In this case the maintenance request and response messages are both
+encrypted with
+<a href="http://www.counterpane.com/blowfish.html">
+Blowfish encryption</a> using a key known both to the server and
+the client. This random salt sent by the server is included in the encrpyted
+request message to prevent the possibility of "spoofing" the server by
+replaying requests.
+
+<p>
+<b>Note:</b>
+<blockquote>
+The Blowfish encryption option is not yet implemented.
+<p>
+It probably never will be either, since encryption over the public Internet
+is easily done using <a href="http://www.stunnel.org/">Stunnel</a>.
+</blockquote>
+
+<p>
+The encrypted request is then converted from binary form to its character
+hexadecimal representation, using the digits and the <u>lower case</u> letters
+"a", "b", "c", "d", "e" and "f".
+The message character string is then transmited to the GnuDIP server.
+It is sent as two lines using a single new line character as the line
+ending. The general form is:
+
+<blockquote><pre>
+1
+encrypted_message_as_hex_on_one_line
+</pre></blockquote>
+
+<p>
+Before being encrypyted, the message that gets encrypted and placed in the
+second line above consists of several lines using <b><u>single new line character
+as the line ending</u></b>, with this form:
+
+<blockquote><pre>
+random_salt
+maintenance_request_line_1
+maintenance_request_line_2
+   *
+   *
+maintenance_request_line_n
+</pre></blockquote>
+
+<p>
+The response from the server will in most cases be single line containing a
+response code:
+
+<blockquote><pre>
+response_code
+</pre></blockquote>
+
+<p>
+For a response code of zero to a <b><code>get</code></b> request, there will
+also be an encrypted data line:
+
+<blockquote><pre>
+0
+encrypted_get_response_as_hex_on_one_line
+</pre></blockquote>
+
+<p>
+Before being encrypyted, the get response that gets encrypted and placed in the
+second line above consists of several lines using <b><u>single new line character
+as the line ending</u></b>, with this form:
+
+<blockquote><pre>
+get_response_line_1
+get_response_line_2
+   *
+   *
+get_response_line_n
+</pre></blockquote>
+
+<p>
+The format of maintenance requests and responses to a "get" is explained
+below, along with the possible response codes.
+
+<h3>Maintenance Requests, Response Codes and Get Responses</h3>
+
+<p>
+These requests correspond precisely at a semantic level to the user
+maintenance commands described in
+<a href="maintenance_commands.html">
+<code>maintenance_commands.html</code></a>. 
+
+<p>
+A request consists of several lines using a <b><u>single new line
+character as the line ending</u></b>. The general form is:
+
+<blockquote><pre>
+command
+parameter_1=value_1
+parameter_2=value_2
+   *
+   *
+parameter_n=value_n
+</pre></blockquote>
+
+<p>
+The number of parameter/value pairs will vary. The "command" is one of:
+
+<blockquote><ul>
+<li><code>get</code>
+<li><code>add</code>
+<li><code>mod</code>
+<li><code>del</code>
+</ul></blockquote>
+
+<p>
+The response from to successful <b><code>get</code></b> request consists of
+two or more data lines:
+
+<blockquote><pre>
+parameter_1=value_1
+parameter_2=value_2
+   *
+   *
+parameter_n=value_n
+</pre></blockquote>
+
+<p>
+We now describe the exchange for each command in more detail:
+
+<dl>
+
+<dt><b>get</b>
+<dd>
+
+<p>
+In this case the request will be of the form:
+<blockquote><pre>
+get
+user=user_name
+domain=domain_name
+</pre></blockquote>
+
+<p>
+If the specified user name is registered for the specified domain, the get will
+succeed and the response will be similiar to:
+
+<blockquote><pre>
+MXbackup = NO
+wildcard = NO
+password = 34e24c964fa7adfb317e2444a94c4357
+forwardurl =
+allowmx = NO
+MXvalue =
+autourlon =
+level = USER
+currentip = 127.0.0.1
+username = rob
+allowwild = NO
+updated = 2002-05-22 14:39:07
+domain = dyn.yourhost.com
+email = rob@elsewhere.com
+</pre></blockquote>
+
+<p>
+The response codes are:
+<ul>
+<li>0 - User existed - get response returned
+<li>1 - User did not exist
+<li>2 - Invalid request - look for GnuDIP log messages
+</ul>
+
+<p>
+
+<dt><b>add</b>
+<dd>
+
+<p>
+In this case the full message will be of the form:
+
+<blockquote><pre>
+add
+user=user_name
+domain=domain_name
+password=clear_text_password
+email=email_address
+</pre></blockquote>
+
+<p>
+The "password" or "email" parameters may be omitted.
+
+<p>
+The response codes are:
+<ul>
+<li>0 - User did not exist - user was added
+<li>1 - User already existed
+<li>2 - Invalid request - look for GnuDIP log messages
+</ul>
+
+<p>
+
+<dt><b>mod</b>
+<dd>
+
+<p>
+In this case the full message will be of the form:
+
+<blockquote><pre>
+mod
+user=user_name
+domain=domain_name
+password=clear_text_password
+hashedpw=MD5_hashed_password
+email=email_address
+allowwild={YES|NO}
+allowmx={YES|NO}
+removedns=YES
+</pre></blockquote>
+
+<p>
+Any of the "password", "hashedpw", "email", "allowwild", "allowmx" or
+"removedns" parameters may be omitted.
+
+<p>
+The response codes are:
+<ul>
+<li>0 - User existed - user was updated
+<li>1 - User did not exist
+<li>2 - Invalid request - look for GnuDIP log messages
+</ul>
+
+<p>
+
+<dt><b>del</b>
+<dd>
+
+<p>
+In this case the full message will be of the form:
+
+<blockquote><pre>
+del
+user=user_name
+domain=domain_name
+</pre></blockquote>
+
+<p>
+The response codes are:
+<ul>
+<li>0 - User existed - user was deleted
+<li>1 - User did not exist
+<li>2 - Invalid request - look for GnuDIP log messages
+</ul>
+
+</dl>
+
+<p><hr>
+
+</body>
+
+</html>
+

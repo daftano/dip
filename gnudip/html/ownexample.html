@@ -1,0 +1,326 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+Your Own Domain Name with External DHCP for Slackware on a Gateway
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body  bgcolor=white style="font-family: helvetica">
+
+<table width="100%">
+<tr>
+
+<td align=left valign=top>
+<img align=middle src="gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+
+<td>
+<h1>
+Your Own Domain Name with External DHCP for Slackware on a Gateway
+</h1>
+
+</tr>
+</table>
+
+<hr>
+
+<p>
+This article assumes the reader is familiar with the contents of
+<a href="owndomain.html">owndomain.html</a>.
+
+<p>
+In this scenario we are running
+<a href="http://slackware.com/">Slackware Linux</a> on an Internet gateway,
+obtaining its dynamic external IP address using DHCP.
+
+<p><hr>
+
+<p>
+Ideally, choose dynamic DNS services that do not themselves have dynamic
+IP addresses, and whose name server names are inside there own domains.
+This will give more efficiency, and some resolver programs
+will choke on two many levels of indirection, despite what the RFC-s
+say.
+
+<p>
+The zone file would contain something like:
+
+<blockquote>
+<pre>
+$TTL 1D
+you.ca.     SOA   you.ca. root.you.ca. (
+                    20020101      ;serial
+                    3600          ;refresh
+                    1800          ;retry
+                    604800        ;expiration
+                    0             ;TTL for NACK
+                    )
+you.ca.     NS    you.dyndnservice1.ca.
+you.ca.     NS    you.dyndnservice2.ca.
+$ORIGIN you.ca.
+$INCLUDE /etc/bind/IP-address
+</pre>
+</blockquote>
+
+<p>
+Make sure that the gateway will boot (to the point where there is a login prompt
+on the gateway console) with the DSL or cable modem unplugged! This
+means <code>named</code> has to be restarted again right after booting, but makes
+things much simpler and grief free.
+
+<p>
+Start a script that uses ISC <code>dhlient</code> in background using "<code>&</code>"
+after everything is up using <code>/etc/rc.d/rc.local</code>:
+
+<blockquote>
+<pre>
+#!/bin/sh
+#
+# /etc/rc.d/rc.local:  Local system initialization script.
+#
+# Put any local setup commands in here:
+
+# set up external interface
+echo "Attempting to configure eth1 by contacting a DHCP server..."
+/bin/touch /var/log/dhclient-at-boot
+/usr/local/dhcp/sbin/dhclient eth1 &> /dev/null 2>&1 &
+
+echo Starting fetchmail daemon ...
+/etc/rc.d/rc.fetchmail 2>&1 | /usr/bin/logger -t rc.fetchmail -s &
+</pre>
+</blockquote>
+
+<p>
+Provide an "enter hooks" script for <code>dhclient</code>
+- <code>/etc/dhclient-enter-hooks</code>:
+
+<blockquote>
+<pre>
+#!/bin/sh
+
+# enter hooks for dhclient-script
+
+# do not overwrite /etc/resolv.conf
+function make_resolv_conf() { return; }
+</pre>
+</blockquote>
+
+<p>
+Provide an "exit hooks" script for <code>dhclient</code>
+- <code>/etc/dhclient-exit-hooks</code>:
+
+<blockquote>
+<pre>
+#!/bin/sh
+
+# exit hooks for dhclient-script
+
+# for debugging
+#( \
+#  echo ==== start of debug dump ==== ; \
+#  echo parms: $* ; \
+#  env ; \
+#  echo ====  end of debug dump  ==== ; \
+#  ) | /usr/bin/logger -t rc.dhclient-exit-hooks
+
+# call our setup script if dhclient has set up interface
+if [ x$reason = xBOUND   ] || [ x$reason = xRENEW  ] || \
+   [ x$reason = xREBIND  ] || [ x$reason = xREBOOT ] || \
+   [ x$reason = xTIMEOUT ]; then
+  /etc/rc.d/rc.dhclient_exit 2>&1 | /usr/bin/logger -t rc.dhclient_exit &
+  exit
+fi
+
+# set up interface ourselves and call our setup script
+if [ x$reason = xEXPIRE  ] || [ x$reason = xFAIL ] || \
+   [ x$reason = xRELEASE ] || [ x$reason = xSTOP ]; then
+  if [ x$old_ip_address = x ]; then
+    if [ -r /var/log/dhclient-addresses ]; then
+      read zzz old_ip_address < /var/log/dhclient-addresses
+    fi
+  fi
+  if [ x$old_ip_address = x ]; then
+    # provide a last ditch default? comment out exit
+    old_ip_address=10.10.10.10
+    exit
+  fi
+  ifconfig $interface inet $old_ip_address
+  export new_ip_address=$old_ip_address
+  /etc/rc.d/rc.dhclient_exit 2>&1 | /usr/bin/logger -t rc.dhclient_exit &
+  exit
+fi
+</pre>
+</blockquote>
+
+<p>
+You may also want to replace the call to the "<code>ping</code>" command
+in the "<code>TIMEOUT</code>" section of the "<code>sbin/dhclient-script</code>"
+script (part of ISC DHCP) with a call to the "<code>true</code>" command.
+Without this, if your ISP's router is down, the "<code>ping</code>" command
+may run indefinitely.
+
+<p>
+The "exit hooks" script for <code>dhclient</code> calls
+<code>/etc/rc.d/rc.dhclient_exit</code>:
+
+<blockquote>
+<pre>
+#!/bin/sh
+
+# read old IP address
+if [ -r /var/log/dhclient-addresses ]
+then
+  read zzz old_ip_address < /var/log/dhclient-addresses
+fi
+if [ "$old_ip_address" == "" ]
+then
+  old_ip_address="0.0.0.0"
+fi
+
+# (re)erect firewall if address changed or boot time
+if [ "$old_ip_address" != "$new_ip_address" ] ||
+   [ -e /var/log/dhclient-at-boot ]
+then
+  # ensure kernel had time to set up interface
+  #/usr/bin/sleep 1
+  # reset firewall
+  /bin/echo \(re\)setting firewall ...
+  /etc/rc.d/rc.firewall
+fi
+
+# record old and new IP addresses
+/bin/echo -n $old_ip_address $new_ip_address &> /var/log/dhclient-addresses
+
+# say whether or not IP address changed
+if [ "$old_ip_address" == "$new_ip_address" ]
+then
+  /bin/echo IP address has not changed
+else
+  /bin/echo IP address has changed from $old_ip_address to $new_ip_address
+fi
+
+# configure BIND
+/bin/echo mail     IN  CNAME mail.$new_domain_name. >  /etc/bind/services
+/bin/echo news     IN  CNAME news.$new_domain_name. >> /etc/bind/services
+/bin/echo www      IN  CNAME www.$new_domain_name.  >> /etc/bind/services
+#
+/bin/echo "@  IN A" $new_ip_address > /etc/bind/IP-address
+#
+/bin/echo zone \"$new_domain_name\" { type forward\; forwarders { > /etc/bind/forward
+for nameserver in $new_domain_name_servers
+do
+  /bin/echo $nameserver\; >> /etc/bind/forward
+done
+/bin/echo }\; }\; >>  /etc/bind/forward
+#
+/bin/echo BIND has been configured
+# IP address changed?
+if [ "$old_ip_address" != "$new_ip_address" ]
+then
+
+  # update address in local dynamic zones
+  /bin/echo Updating addresses for dynamic zones to $new_ip_address
+  /usr/local/bind/bin/nsupdate -v -k \
+    /usr/local/gnudip/etc/Kgnudip-key.+157+41184.private << EOF
+server localhost
+update delete dyn.you.ca.    A
+update add    dyn.you.ca. 60 A $new_ip_address
+
+update delete dyn2.you.ca.    A
+update add    dyn2.you.ca. 60 A $new_ip_address
+
+EOF
+  /bin/echo
+  /usr/local/bind/bin/host dyn.you.ca.
+  /usr/local/bind/bin/host dyn2.you.ca.
+
+fi
+
+# restart affected daemons if address changed or boot time
+if [ "$old_ip_address" != "$new_ip_address" ] ||
+   [ -e /var/log/dhclient-at-boot ]
+then
+
+  # restart named
+  if /bin/ps -C named &> /dev/null
+  then
+    /bin/echo Stopping named ...
+    /bin/killall named
+  fi
+  /bin/echo Starting named ...
+  /etc/rc.d/rc.named
+
+  # (re)start ntpd
+  if /bin/ps -C ntpd &> /dev/null
+  then
+    /bin/echo Stopping ntpd ...
+    /bin/killall ntpd
+  else
+    /bin/echo Calling ntpdate ...
+    /usr/local/ntp/bin/ntpdate ddd.ddd.ddd.ddd
+  fi
+  /bin/echo Starting ntpd ...
+  /usr/local/ntp/bin/ntpd
+
+  # (re)start iplog
+  if /bin/ps -C iplog &> /dev/null
+  then
+    /bin/echo Stopping iplog ...
+    /bin/killall iplog
+  fi
+  /bin/echo Starting iplog ...
+  /usr/local/iplog/sbin/iplog
+
+fi
+
+# no longer boot time
+/bin/rm /var/log/dhclient-at-boot &> /dev/null
+
+# update dynamic DNS services?
+/etc/rc.d/rc.dyndns
+</pre>
+</blockquote>
+
+<p>
+And <code>/etc/rc.d/rc.dhclient_exit</code> calls <code>/etc/rc.d/rc.dyndns</code>:
+
+<blockquote>
+<pre>
+#!/bin/sh
+#
+# rc.dyndns
+#
+# update dynamic DNS services if needed
+
+echo Updating IP address at GnuDIP servers ...
+/usr/local/gdipc/bin/gdipc.pl -f /etc/gdipc/gdipc.conf
+
+echo Updating IP address at notgnudip.org ...
+/usr/local/ez-ipupdate/bin/notgnudip.org.conf
+</pre>
+</blockquote>
+
+<p>
+Some daemons have to be restarted when the address changes, because they are
+listening on specific IP addresses, and will not automatically listen on
+the new address (use "<code>netstat -ap | less -S</code>" to see which).
+This applies to named. Also you may want to supply <code>named</code> with
+information from DHCP which has to go in <code>named.conf</code>.
+So <code>named</code> has to be restarted. You could make the zones for your
+internal machines and <code>you.ca</code> dynamic, but you may find it more
+convenient to be able to edit the files (and use <code>$INCLUDE</code>).
+
+<p><hr>
+
+</body>
+</html>
+

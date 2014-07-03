@@ -1,0 +1,563 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+GnuDIP Release 2.3.5 - TODO File
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body bgcolor=white>
+
+<table><tr valign=middle><td>
+<img align=middle src="gnudip/html/gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+</td><td>
+<h1>GnuDIP Release 2.3.5 - TODO File</h1>
+</table>
+
+<hr>
+
+<p>
+<b><u>GnuDIP is now only minimally maintained.
+New development will not occur unless a new developer steps forward.
+</u></b>
+
+<p>
+These items are just here as food for thought.
+
+<p><hr>
+
+<p>
+
+<h3>Better Documentation</h3>
+<blockquote>
+
+<p>
+In particular the "Help" available from the Web Tool could be better.
+
+</blockquote>
+<h3>A MacPerl Client Package</h3>
+<blockquote>
+
+<p>
+There is a port of Perl for MacOS called
+<a href="http://www.macperl.com/">MacPerl</a>.
+
+<p>
+Perhaps someone could create a MacPerl client package similiar to the Windows 
+<a href="http://aspn.activestate.com/ASPN/Downloads/ActivePerl/">ActivePerl</a>
+client package.
+
+</blockquote>
+<h3>Navigation Buttons in the GUI</h3>
+<blockquote>
+
+<p>
+The GUI interface might be more user friendly with navigation buttons. It
+should be noted that this would have the drawback of accumulating cached pages on
+the browsers "Back" button.
+
+</blockquote>
+<h3>Have the Client Check for a Default Gateway</h3>
+<blockquote>
+
+<p>
+The GnuDIP client at present attempts to connect to the GnuDIP server whenever
+it determines that the address it recorded at the time of the last update is
+no longer valid, or it has no recorded address. But this will be the case if
+the external connection no longer exists. So when the client is being run at
+intervals, in order to "poll" for IP address changes,
+the client will repeatedly attempt a connection,
+timing out each time. Perhaps a check could be made to see if there is a
+"default gateway" to the internet before attempting to connect to the GnuDIP
+server.
+
+</blockquote>
+<h3>A Mechanism to Link Non-GnuDIP Host Names to a GnuDIP Host Name</h3>
+<blockquote>
+
+<p>
+Some sites use DNS <code>CNAME</code> records to point non-GnuDIP host names
+at a GnuDIP ("canonical") host name. The objective is to provide dynamic IP support
+for these non-GnuDIP domain names.
+
+<p>
+This can be problematic in some circumstances. For example:
+<p>
+<ul>
+<li>
+It is not possible to have a <code>CNAME</code> and an <code>SOA</code> record
+for the same name. So the zone for <code>site.com</code> cannot have a
+<code>CNAME</code> record for <code>site.com</code>.
+<p><li>
+It is not possible to have a <code>CNAME</code> and an <code>MX</code> record
+for the same name.
+<p><li>
+If mail is sent to a host name defined in a <code>CNAME</code> record, a
+standards compliant MTA will re-address the mail to the canonical host name, so
+that the receiving MTA must accept mail addressed to the canonical/GnuDIP host
+name. 
+</ul>
+
+<p>
+It would be better if the <code>CNAME</code> record could be replaced with an
+<code>A</code> record.
+
+<p>
+To remedy this, GnuDIP could maintain a list of host names for which an
+<code>A</code> record update should be done, whenever an <code>A</code>
+record update is done for the GnuDIP host. This list would be maintainable only
+by a GnuDIP administrative user. It would be up to the GnuDIP site operator to
+set up the appropriate non-GnuDIP dynamic domains.
+
+<p>
+<b>It would be possible in principle to implement this as a separate software
+component, by providing a "drop in replacement" for the <code>nsupdate</code>
+command.</b> To make this more efficient, GnuDIP could be modified to be able to
+either invoke <code>nsupdate</code>, or alternatively send the update information
+to a UNIX domain socket. The "add on" component could then provide a daemon to
+process these updates, rather than a replacement for <code>nsupdate</code>.
+
+<p>
+Please note that since this blurb was first written, the script
+<a href="gnudip/sbin/multinsupd.pl"><code>gnudip/sbin/multinsupd.pl</code></a>
+has been written, to filter the commands being passed to the
+<code>nsupdate</code> command, in order to insert non-GnuDIP aliases for GnuDIP
+host names. See the comments in the script, as well as the example and comments in
+<a href="gnudip/etc/gnudip.conf"><code>gnudip/etc/gnudip.conf</code></a>,
+<a href="gnudip/etc/minidip.conf"><code>gnudip/etc/minidip.conf</code></a> and
+<a href="gnudip/etc/multinsupd.conf"><code>gnudip/etc/multinsupd.conf</code></a>.
+This script goes a long towards addressing this blurb. There is however no
+web GUI.
+
+</blockquote>
+<h3>Per User TTL Specification</h3>
+<blockquote>
+
+<p>
+The web interface could allow an administrator to set a TTL value on a
+per user basis. Users that are observed to have a high DNS volume could have
+their TTL value raised, to increase caching and reduce the load on the GnuDIP
+DNS server. This would have the drawback of making the dynamic DNS service for
+that user less responsive to IP address changes.
+
+<p>
+Please note that since this blurb was first written, changes have been
+made to allow a user level TTL override to be done from the
+<code>gnudip.conf</code> (or <code>minidip.conf</code>) file, in the
+same way as for domain level override. There is however no
+web GUI.
+
+</blockquote>
+<h3>Automatic Server Abuse Detection and Prevention</h3>
+<blockquote>
+
+<p>
+An effort could be made to detect server abuse automatically, and take
+steps to stop it. For example:
+
+<ol>
+<li>
+The server could
+record the most recent login attempt, successful or not, for all host
+names, not just registered hosts. A separate table would be used for
+this. There would be a system (or per host) parameter for the minimum acceptable
+time between updates. If an update arrives for a host within this interval,
+the server would disable the host (creating it if necessary!).
+
+<p>
+Note that automatic disabling of a host would not be done for updates
+for a valid user but with an invalid password. Otherwise it would be
+possible for a third party to disable any GnuDIP host's DNS entry.
+This would be done only when the host does not exist or the login
+succeeds. It may also be desirable to have a flag for hosts that the
+administrator can set to exempt a host from this regimen.
+
+<p><li>
+A utility could be written to scan the BIND <code>named</code> log for activity for
+GnuDIP users. At intervals the activity levels for each user could be assessed, and
+adjustments to the TTL value for each user adjusted to reduce the DNS load.
+
+</ol>
+
+</blockquote>
+<h3>Use of Windows IP Interface Change Notification</h3>
+<blockquote>
+
+<p>
+On later versions of Windows, it is possible for a daemon process to request a
+notification when a change occurs to any IP interface. The GnuDIP client could
+use this when running in "daemon mode", in addition to the current polling. This
+would provide more timely detection of IP address changes.
+
+<p>
+However the author does not own a recent enough version of Windows to test this,
+and is not going to give any more money to Bill Gates until he absolutely has
+too.
+
+</blockquote>
+<h3>General Enhancements</h3>
+<blockquote>
+
+<ul>
+
+<li>
+support for <a href="http://www.ipv6.org/">IPv6</a>
+<p>
+This will eventually be necessary.
+
+<p><li>
+instructions for <b>byte compiling</b> the GnuDIP Perl scripts
+<p>
+Hopefully the Perl byte code generation and reload facilities will soon
+be easily usable.
+When that occurs, the necessary steps for GnuDIP should be documented.
+<p>
+Precompilation should improve the start up time for the (X)INETD server
+script and the web tool when it is not running under mod_perl.
+
+<p><li>
+multiple language support
+<p>
+A set of patches could be developed which alter the base file set for
+other languages. Those text strings in HTML, E-mail and messages from the
+client as well as documentation, <u>intended to be seen by end users</u>.
+would be translated.
+<p>
+People who wish to provide a GnuDIP service for speakers of a particular
+language could then apply the patch for the desired language.
+
+</ul>
+
+</blockquote>
+<h3>Internal Restructuring</h3>
+<blockquote>
+
+<ul>
+
+<li>
+improvements to name space management for functions
+<p>
+Each Perl module in GnuDIP has its own name space for variables.
+Variables that are to be visible to more than one module must be
+declared as "global". This is very convenient. However this is not so
+for function names, and the GnuDIP code has grown to a size where this
+is a hassle, and possibly a deterent to making code changes.
+It would be desirable to use the Perl "<code>package</code>" statement
+in each GnuDIP module to provide the same sort of "local" name space
+for function names. It would then be necessary to use the
+"<code>Exporter</code>" Perl module to export those function names
+meant to be global.
+<p>
+This would be quite a sweeping change, and would require careful
+testing. <b>It would be a good project for someone who wanted to become
+familiar with the GnuDIP code</b>, and add new features to it.
+
+<p><li>
+multiple language support
+<p>
+The GnuDIP code could stand to be restrucured with multiple
+language support in mind. A user of the Web Interface should be able to
+select their prefered language, and see all prompts and help screens in
+that language. The GnuDIP client should also support multiple languages.
+<p>
+As part of this, all messages would have to be extracted to a separate
+Perl module, and imbedded in HTML by using Perl variables. The "Help"
+pages would have to be presented by a simple CGI script in order that
+different versions of the HTML files would be provided depending on the
+language chosen. The prefered language could be saved in an HTTP
+cookie.
+<p>
+Initially, there would only be an English version of all
+messages and HTML files, unless the person who did this spoke some other
+language(s). But it would become simple for non-technical
+people to provide new translations.
+
+<p><li>
+atomic file replacement for "flat file database" mode
+<p>
+The code that reads and overwrites the files used in flat file database
+mode simply overwrites the existing files. In principle, this could result
+in file corruption if two processes update a file at the same time.
+<p>
+The author decided that this was not a problem in this case because each
+file is very small, and will probably be read or written in a single I/O,
+and because the usage pattern of these files would make it extremely
+unlikely that a collision would occur. The preferences file, once set up,
+is never rewritten in normal operation. A user file is only rewritten if
+a transaction has provided the correct user password. So a user file could
+only be trashed if someone knowing the password for the user manages to
+run two updates for the same user within milliseconds. And if they achieve
+this, only that user file would be damaged (serves them right!).
+<p>
+However, instead of directly overwriting files, a new file with a randomly
+generated name could be created, and then this file renamed,
+thereby overwriting the directory entry. The Perl documentation however
+warns that there can be portability issues with rename - even cautioning
+that some Unix variant may not clobber an existing file. If so, then this
+could end up being more trouble than it is worth.
+
+<p><li>
+move the GnuDIP "*.pm" files from <code>lib</code> to <code>lib/gnudip</code>
+<p>
+There is a potential at the moment for some GnuDIP module name to block
+some other non-GnuDIP module. 
+
+</ul>
+
+</blockquote>
+<h3>More Sample Scripts for the Use of a DNS Server on the Client Machine</h3>
+<blockquote>
+
+<p>
+As discussed in <a href="gnudip/html/owndomain.html">owndomain.html</a>,
+users may use their own domain name with a dynamic IP address if they are willing
+to run BIND on the client machine.
+
+<p>
+More documentation and sample scripts could be written explaining how to
+do this.
+
+<p>
+Documentation and samples for <a href="http://tinydns.org/">tinydns</a> and
+other DNS server software could also be written.
+
+</blockquote>
+<h3>Sample Scripts for Querying NAT Devices for their External IP Address</h3>
+<blockquote>
+
+<p>
+The current support for operation of the client behind closed NAT devices should
+handle all but very exceptional cases.
+
+<p>
+However if the NAT device itself is behind an IP masking/anonymizing proxy,
+the GnuDIP server will not be able to see the external
+IP address of the NAT device, and so will not be able to return it to the
+client.
+
+<p>
+In this situation it would be necessary for the client to directly query the NAT
+device for its external IP address.
+
+<p>
+Ideally, all closed NAT devices would implement
+<a href="http://ietf.org/rfc/rfc1213.txt">MIB-II</a>
+/
+<a href="http://ietf.org/rfc/rfc1157.txt">SNMP</a>.
+Most Linux distributions do not install this capability by default.
+One must install <a href="http://net-snmp.sourceforge.net/">net-snmp</a>
+in order to support this. This fact causes the author to wonder whether
+very many vendors of NAT devices have implemented this.
+
+<p>
+A sample script is currently provided in the client package to query
+for the external address of a host using MIB-II/SNMP ("<code>snmpqry.pl</code>").
+It uses
+<a href="http://www.switch.ch/misc/leinen/snmp/perl/">
+a pure Perl SNMP implementation</a> to retrieve the routing table
+entry interface number for address <code>0.0.0.0</code>, and then scans the
+IP address table entries for a matching interface number.
+The client script can invoke this sample script using the "<code>-q</code>"
+option.
+
+</blockquote>
+<h3>An SMTP Monitor Daemon</h3>
+<blockquote>
+
+<p>
+This would be a process to run continually, connecting to the SMTP port
+for particular GnuDIP users, to ensure that mail sent to their host name
+will be correctly
+received. When an SMTP agent does not respond correctly to a TCP connection,
+the monitor would automatically change the address for the associated
+GnuDIP user to a "dead" IP address, so that packets sent to it are dropped.
+
+<p>
+This would ensure that the originating SMTP agent sends E-mail
+to the "backup" SMTP agent instead
+and that the backup SMTP agent does not bounce this E-mail.
+
+<p>
+Original addresses would be cached. For subsequent checks for that
+GnuDIP user, if the address has not been reset by an update from the
+associated GnuDIP client, the original address would be retested and
+restored if found to work again.
+
+</blockquote>
+<h3>An Extension to GnuDIP to Handle Any Domain Name</h3>
+<blockquote>
+
+<p>
+This could be built as separate add-on component for GnuDIP to make thngs
+simpler. We will refer to it here as "MyGnuDIP".
+
+<p>
+Zones have to be individually defined in the BIND <code>named.conf</code> file, or
+files that it includes. These files must be parsed by <code>named</code> whenever
+it starts up, or whenever an "<code>rndc reconfig</code>" command is issued to add
+or remove zones. Almost a megabyte of sequential files would need to be parsed when
+a new domain is created, once there are about five thousand users.
+<b>This does not scale well</b>.
+
+<p>Nevertheless, MyGnuDIP could maintain a sequential file of zone definitions
+which has an "<code>include</code>" statement for it in the
+<code>named.conf</code> file, and generate an "<code>rndc reconfig</code>"
+command whenever this was changed.
+
+<p>
+It would also be necessary to create a protocol and daemon software to propogate
+new zones to slave servers.
+
+<p>
+And of course an elaborate (depending on how much detail of the contents of
+the zone the user may maintain) web interface would have to be built.
+The blurb "Mechanism to Link Non-GnuDIP Host Names to a GnuDIP Host Name"
+above would be rolled into this functionality. MyGnuDIP "<code>A</code>"
+records would refer to a GnuDIP domain name, and would be updated whenever
+the corresponding GnuDIP "<code>A</code>" record was updated.
+
+<p>
+To make sure no one else can "hijack" a domain they do not own on the MyGnuDIP
+server, the following scheme could be used. A user can claim an existing domain
+name if an SOA query for that domain does not return the name of the MyGnuDIP
+master DNS server. It is true that a user could have a struggle with someone
+else until they get the domain name "nailed down". The E-mail address could
+be used to nofify people when their domain name is claimed.
+
+<p>
+The SOA query would be done using the BIND <code>dig</code> command.
+
+<p>
+It should also be noted here that:
+
+<ul>
+
+<li>
+<b>Many installers of GnuDIP may not want such a feature</b>.
+
+<p>
+There are a number of Virtual Domain/DNS providers who provide a free GnuDIP-style service
+as a "loss leader", to get you in the door. They then charge for custom DNS hosting.
+
+<p>
+There is also some promotional advantage to them to have other people using a subdomain
+of their domain.
+
+<p>
+So many sites may not want this "MyGnuDIP" add-on, unless it has hooks for billing
+code to be added (ugh!).
+
+<p><li>
+<b>The same end result can be achieved by setting up a DNS server on the client machine</b>.
+
+<p>
+This is discussed in <a href="gnudip/html/owndomain.html">owndomain.html</a>.
+
+</ul>
+
+</blockquote>
+<h3>C Packaged by GNU Autoconf for the (X)INETD Server</h3>
+<blockquote>
+
+<p>
+The Perl version of this server has to be compiled each time the server is run.
+
+<p>
+One could write a C version of this server. Also, most open source C system
+software now uses
+<a href="http://www.gnu.org/directory/autoconf.html">GNU autoconf</a>
+to facilitate portability.
+
+<p>
+This may be less of a concern once <u>the Perl byte-code compiler and interpreter</u>
+modules reach maturity. It may in fact not be a major issue in any case.
+
+</blockquote>
+<h3>C Packaged by GNU Autoconf for the GnuDIP Client</h3>
+<blockquote>
+
+<p>
+The Perl version of the client has to be compiled each time it is run.
+
+<p>
+Also, because the Perl "infrastructure" must be in place for it to work,
+it does not lend itself to being invoked from another program, such as a GUI
+front-end (e.g., C/KDE, C/GNOME, C/MFC, C/wxWin, VB, Delphi).
+
+<p>
+One could write a C version of this server. Also, most open source C system
+software now uses
+<a href="http://www.gnu.org/directory/autoconf.html">GNU autoconf</a>
+to facilitate portability.
+
+<p>
+Note that <a href="http://sources.redhat.com/cygwin/">cygwin</a>
+makes the usual GNU C development environment available for Windows.
+
+<p>
+The client functionality could also be made available as a C API available
+through shared libraries (for Linux "shared library" == "*.so";
+on Windows "shared library" == "*.dll").
+
+<p>
+This would allow people to develop nice looking GUI-s using the plethora
+of GUI development tools now available, without having to understand all
+of the nasty networking/DNS issues associated with GnuDIP.
+
+</blockquote>
+<h3>Windows GUI Client</h3>
+<blockquote>
+
+<p>
+Windows users like and are used to GUI interfaces.
+
+<p>
+To avoid completely rewriting the Windows client,
+one could use the <code>Tk</code> and <code>Win32::API</code> Perl
+modules to write a Windows GUI client. This could be
+packaged for installation using Microsoft Software Installer (MSI) and/or
+<a href="http://www.jrsoftware.org/isinfo.php">Inno Setup</a>.
+The necessary pieces from ActivePerl could be included to make it stand-alone.
+
+<p>
+The Web Tool provides a reasonably easy to use the GUI interface for manual
+updates. This is particulary true if the user sets up a Desktop Shortcut for
+their "Quick Login" URL. If the user wants to be able to manually update several
+servers at once, they can install the Perl client and set up a Desktop
+Shortcut to "gdipc.bat". Also, experience at legacy GnuDIP sites showed that most
+GnuDIP users used the browser to update, even though there was a Visual Basic GUI
+client available.
+
+<p>
+The main advantage of a GUI windows client may be to provide an alternative method
+to "gdipc.bat" for automatic detection and reporting of IP address changes.
+A Windows GUI could remove the need to use a DOS box, notepad and the Windows Task
+Scheduler GUI interface for configuration. The need for these activities may deter
+some less technical users from using "gdipc.bat".
+
+<p>
+Please note that since this blurb was first written, an Open Source Windows
+GUI client has been written using Delphi - see
+<a href="http://gnudip2.sourceforge.net/dynclient/">
+http://gnudip2.sourceforge.net/dynclient/</a>.
+However a fully Open Source client requiring only other Open Source tools
+(e.g. <a href="http://sources.redhat.com/cygwin/">cygwin</a>)
+may still be desirable.
+
+</blockquote>
+
+<p><hr>
+
+</body>
+
+</html>
+

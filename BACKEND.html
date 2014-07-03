@@ -1,0 +1,239 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+GnuDIP Release 2.3 - Back End INSTALL File
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body bgcolor=white>
+
+<table><tr valign=middle><td>
+<img align=middle src="gnudip/html/gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+</td><td>
+<h1>GnuDIP Release 2.3 - Back End INSTALL File</h1>
+</table>
+
+<hr>
+
+<h3>Back End Scripts to Support Legacy BIND and tinydns</h3>
+<p>
+Releases of BIND prior to 8.2.3 and the
+<a href="http://tinydns.org/">tinydns</a>
+DNS server software do not support dynamic DNS in the fashion prescribed by
+the IETF RFC-s, and cannot be updated using the <code>nsupdate</code> command.
+<p>
+It is still possible to use early BIND releases and tinydns with GnuDIP.
+A few additional scripts are involved. These scripts use the configuration file
+<a href="gnudip/etc/backend.conf"><code>gnudip/etc/backend.conf</code></a>.
+<p>
+At a minimum, this configuration file must contain a line defining the command used to log
+messages. In the sample file this is:
+<blockquote><pre>
+# logger command for backend server
+logger = /usr/bin/logger -t gnudip-bkend
+</pre></blockquote>
+<p>
+Each back end has an associated:
+<ul>
+<li>
+UNIX FIFO file,
+<p><li>
+reload command and
+<p><li>
+minimum interval between reloads.
+</ul>
+You must create the FIFO (using <code>mkfifo</code>).
+The fifo may be created anywhere, but
+<a href="gnudip/run/"><code>/usr/local/gnudip/run/</code></a>
+would be an obvious place for it.
+Ensure that it is owned by and writable by user <code>nobody</code>
+(the "<code>nobody</code>" that GnuDIP runs as),
+with no access by any other user.
+<p>
+Three attributes must be provided in
+<a href="gnudip/etc/backend.conf"><code>backend.conf</code></a>
+for each back end. For example, the sample legacy BIND back end
+is defined by:
+<blockquote><pre>
+# name of fifo for dyn3.yourhost.com
+fifo.oldBIND.dyn3 = /usr/local/gnudip/run/backend.oldBIND.dyn3
+
+# command to actually reload dyn3.yourhost.com
+reload.oldBIND.dyn3 = /usr/local/gnudip/sbin/gdiprlbind.sh dyn3.yourhost.com
+
+# minimum seconds between reloads
+wait.oldBIND.dyn3 = 30
+</pre></blockquote>
+<p>
+The sample tinydns back end is defined by:
+<blockquote><pre>
+# name of fifo for tinydns
+fifo.tinydns = /usr/local/gnudip/run/tinydns
+
+# command to actually reload
+reload.tinydns = /usr/local/gnudip/sbin/gdiprltiny.sh
+
+# minimum seconds between reloads
+wait.tinydns = 5
+</pre></blockquote>
+<p>
+To use a back end by default for all GnuDIP domains, you replace the
+global <code>nsupdate</code> command with the back end client
+<a href="gnudip/sbin/gdipbkclt.pl"><code>gdipbkclt.pl</code></a>
+script in
+<a href="gnudip/etc/gnudip.conf">gnudip.conf</a>
+using a line like:
+<blockquote><pre>
+nsupdate = /usr/local/gnudip/sbin/gdipbkclt.pl mybackend
+</pre></blockquote>
+<p>
+To use a back end for a particular domain, you replace the
+<code>nsupdate</code> on a per domain basis using a line like:
+<blockquote><pre>
+nsupdate.mydomain = /usr/local/gnudip/sbin/gdipbkclt.pl mybackend
+</pre></blockquote>
+<p>
+The back end client script must be passed the back end name as an argument.
+The script will indicate that an update for the specified domain is needed by
+writing the back end name to the FIFO.
+<p>
+<u>For testing puposes you should use this client from the command line</u>:
+<blockquote><pre>
+# gdipbkclt.pl
+usage: gdipbkclt.pl [ -h | backend ]
+usage: Notify the backend server that that an
+usage: update to the backend has occured. The 'backend'
+usage: argument is used for look ups in backend.conf.
+usage: -h: Print this usage message.
+</pre></blockquote>
+<p>
+If the back end is for tinydns, you will need to specify an additional
+configuration parameter, either:
+<blockquote><pre>
+tinydns = YES
+</pre></blockquote>
+<p>
+globally or
+<blockquote><pre>
+tinydns.mydomain = YES
+</pre></blockquote>
+<p>
+for the per domain case. The Web Tool needs to know if a domain is being
+served by tinydns, in order to correctly validate MX values.
+<p>
+<u>You may have multiple domains for the same back end</u>.
+<p>
+You must also set up the back end server script
+<a href="gnudip/sbin/gdipbksrv.pl"><code>gdipbksrv.pl</code></a>
+to start at system start up using a command line like:
+<blockquote><pre>
+/usr/local/gnudip/sbin/gdipbksrv.pl mybackend
+</pre></blockquote>
+<p>
+Where you put this command line depends on the flavor of UNIX you have.
+For Slackware Linux it would go in <code>/etc/rc.d/rc.local</code>.
+You will have to determine where it goes on your system.
+It must also be passed the back end name as an argument.
+<p>
+<u>For testing puposes you may start this server from the command line</u>:
+<blockquote><pre>
+# gdipbksrv.pl
+usage: gdipbksrv.pl [ -h | [ -d ] backend ]
+usage: GnuDIP backend server.
+usage: Receive notififications that updates to the backend have occured,
+usage: and initiate reloads. The 'backend' argument is used for look
+usage: ups in backend.conf.
+usage: -h: Print this usage message.
+usage: -d: Debug - stay attached to current terminal.
+</pre></blockquote>
+<p>
+This server script will run your back end reload command when it
+receives a notification on the FIFO, unless enough time has not passed since
+the last time it was run. In that case it will run the reload script
+as soon as allowed. The script will be run as the <code>root</code>
+user.
+<p>
+You will in general need to <u>customize the back end reload script
+to your particular GnuDIP installation</u>.
+Two <b><u>sample</u></b> UNIX shell scripts are provided as a starting point:
+<ul>
+<li>
+<a href="gnudip/sbin/gdiprlbind.sh"><code>gdiprlbind.sh</code></a>
+<p>
+The script is for BIND. It takes a domain name as an argument.
+It scans the GnuDIP database for
+all users for that domain and generates input for a BIND 8 zone
+file.
+<p><li>
+<a href="gnudip/sbin/gdiprltiny.sh"><code>gdiprltiny.sh</code></a>
+<p>
+This script is for tinydns. It takes no arguments.
+It scans the GnuDIP database for all users (from all domains) and generates
+input for the <code>tinydns-data</code> utility.
+</ul>
+<p>
+These scripts are very simple because they each use a database scan script
+provided with GnuDIP:
+<ul>
+<li>
+<a href="gnudip/sbin/gdipbind.pl"><code>gdipbind.pl</code></a>
+for BIND 8:
+<blockquote><pre>
+# gdipbind.pl -h
+usage: gdipbind.pl [ -h | [ [-o | -a] outfile ] domain ]
+usage: Scans the database and generates BIND zone file input.
+usage: -h: Print this usage message.
+usage: -o: Specify file to write output to.
+usage: -a: Specify file to append output to.
+</pre></blockquote>
+<p><li>
+<a href="gnudip/sbin/gdiptinydns.pl"><code>gdiptinydns.pl</code></a>
+for tinydns:
+<blockquote><pre>
+# gdiptinydns.pl -h
+usage: gdiptinydns.pl [ -h | [ [-o | -a] outfile ] [domain] ]
+usage: Scans the database and generates tinydns input to create domain
+usage: file. Scans for all domains unless "domain" is specified.
+usage: -h: Print this usage message.
+usage: -o: Specify file to write output to.
+usage: -a: Specify file to append output to.
+</pre></blockquote>
+</ul>
+<p>
+Each sample reload script prefixes the output from the database scan script
+with additional input that is needed. It then initiates a DNS reload
+(i.e. on the local host).
+
+<p><hr>
+
+<p>
+You may require more sophisticated scripts for your environment.
+<p>
+The tinydns suite provides its own mechanism for detecting the changes to the
+domain file and performing an "incremental" zone transfer to secondary
+servers, using the <code>rsync</code> command. So if the primary tinydns server
+is on the GnuDIP machine, propogation of updates can be done in the normal way
+for tinydns.
+<p>
+Using BIND zone transfers to update secondary servers with early releases
+of BIND, while doing frequent zone reloads is problematic. The full zone
+transfers cause a severe demand on the network as the size of the zone grows.
+If you must use an early release of BIND, you may want to develop your
+mechanism for maintaining multiple servers. 
+
+<p><hr>
+
+</body>
+
+</html>
+

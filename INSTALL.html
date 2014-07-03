@@ -1,0 +1,1323 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+       "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<title>
+GnuDIP Release 2.3.5 - INSTALL File
+</title>
+
+<base target="_blank">
+
+</head>
+
+<body bgcolor=white>
+
+<table><tr valign=middle><td>
+<img align=middle src="gnudip/html/gnudip.jpg" alt="GnuDIP Logo" border=0 height=60 width=113>
+</td><td>
+<h1>GnuDIP Release 2.3.5 - INSTALL File</h1>
+</table>
+
+<hr>
+
+<h3>Preliminary Steps</h3>
+
+<ol>
+
+<li>
+Become familiar with the set of low privilege UNIX user IDs used for running
+daemons on your system.
+
+<p>
+Many UNIX systems use a very simple system. There is a user ID named
+<code>nobody</code>. The <code>nobody</code> user ID cannot be logged in to.
+It can only be reached through the "<code>root</code>" user ID. It also has
+its own group. A process running under this ID will only be able to read files
+that are "world readable", and only able to modify or delete files that are
+"world writable".
+
+<p>
+Within this set up it is common practice to run the BIND
+<code>named</code> daemon as user <code>nobody</code>. Also, the sample
+configuration file that comes with the Apache web server source will run all
+CGI scripts as user <code>nobody</code>.
+
+<p>
+Some systems (apparently Red Hat does this) have several "<code>nobody</code>"
+user ID-s. Each daemon that can be run as a low privilege user gets its own
+user ID.
+
+<p>
+In these instructions, we assume that there is a single <code>nobody</code>
+user ID. When we refer to the <code>nobody</code> user ID, the reader should
+substitute the appropriate user ID for the daemon being discussed.
+
+<p><li>
+Move the directory <a href="gnudip/"><code>gnudip</code></a>
+to <code>/usr/local</code> (or <code>/opt</code>, or wherever you wish -
+we will assume <code>/usr/local</code> in what follows).
+If you copy this directory instead,
+be careful that the file ownerships of the files in
+the  <a href="gnudip/etc/"><code>gnudip/etc/</code></a>
+directory do not change.
+
+</ol>
+
+<h3>The "MiniDIP" Alternative</h3>
+
+<blockquote>
+This package includes a bare bones version of GnuDIP with no database
+or web tool. There is a <u>single configuration file</u>, which includes the list
+of host names and their passwords.
+
+<p>
+The <a href="gnudip/sbin/minidip.pl"><code>minidip.pl</code></a>
+Perl script is a <code>(X)INETD</code> daemon address update server program.
+The <a href="gnudip/lib/miniupdt.pm"><code>miniupdt.pm</code></a>
+Perl script is a CGI address update server program.
+They use <a href="gnudip/etc/minidip.conf"><code>minidip.conf</code></a>
+in the GnuDIP configuration directory as the configuration file.
+The <code>(X)INETD</code> daemon allow the name of the configuration file
+to be overridden using command argument.
+
+<p>
+The <code>BIND</code> setup (this option does not support "back ends"
+- see below) is the same as for the full GnuDIP software.
+
+<p>
+The <code>(X)INETD</code> daemon setup is the same as for the
+standard GnuDIP <code>(X)INETD</code> daemon.
+
+<p>
+The CGI setup is also the same as for the standard GnuDIP CGI, if it is
+acceptable to have "<code>/gnudip/cgi-bin/miniupdt.cgi</code>"
+as the URL for the CGI. Otherwise you will need to use "<code>ScriptAlias</code>"
+definitions to suit your needs.
+
+<p>
+Combining
+<a href="gnudip/sbin/minidip.pl"><code>minidip.pl</code></a>
+and
+<a href="gnudip/lib/miniupdt.pm"><code>miniupdt.pm</code></a>
+with the
+<a href="gnudip/sbin/multinsupd.pl"><code>multinsupd.pl</code></a>
+script discussed below in "Linking Non-GnuDIP Host Names to a GnuDIP Host Name"
+can provide a great deal of functionality.
+
+</blockquote>
+
+<h3>Upgrading an Existing MySQL Database</h3>
+
+<ol>
+
+<li>
+If you have an existing GnuDIP MySQL database, upgrade this GnuDIP database. Note that
+there have been no database changes since release 2.3.0.
+
+<p>
+Start the MySQL client using:
+
+<pre>
+# mysql -p
+</pre>
+
+Follow the contents of
+<a href="upgrade.mysql"><code>upgrade.mysql</code></a> to do the <u>first part</u> the
+upgrade.
+
+<p>
+Or you can read and edit the contents of <code>upgrade.mysql</code>, setting the
+MySQL database name, and then use:
+
+<pre>
+# mysql -fvp < upgrade.mysql
+</pre>
+
+<p>
+The <code>upgrade.mysql</code> file is designed to upgrade from either
+either release 2.1.2 or release 2.2.x when used in this "automatic" way.
+In the latter case however, <u>some error messages</u> may be produced.
+
+<p>
+Scan the GnuDIP database and generate the statements to complete the database
+upgrade using:
+
+<pre>
+# <a href="gnudip/sbin/gdipdbcnv.pl">/usr/local/gnudip/sbin/gdipdbcnv.pl</a> database localhost user password > myupgrade.mysql
+</pre>
+
+The arguments are the MySQL database name, the server running MySQL, and the
+user name and password to connect to MySQL with, respectively. Read and understand the
+file that <code>gdipdbcnv.pl</code> produced:
+
+<ul>
+<li>
+There will be statements to delete and recreate the contents of the
+<code>globalprefs</code> table.
+
+<p><li>
+If you used 
+<code>DOMAIN_TYPE='GLOBAL'</code> in Release 2.1.2
+(which is no longer an option - see
+<a href="release.html">
+<code>release.html</code></a>), then the value of the <code>domain</code>
+column will be the empty string for each row of the <code>users</code> table. The statements
+generated by <code>gdipdbcnv.pl</code> will replace each such row with several replacement
+rows - one for each domain.
+
+</ul>
+
+<p>
+When you have examined these MySQL statements, run them using:
+
+<pre>
+# mysql -p < myupgrade.mysql
+</pre>
+
+</ol>
+
+<h3>New Database Set Up</h3>
+
+<ol>
+
+<li>
+If you have no existing GnuDIP database and <b>wish to use MySQL</b>, create a new
+GnuDIP MySQL database.
+
+<p>
+Start the MySQL client using:
+
+<pre>
+# mysql -p
+</pre>
+
+Follow the contents of
+<a href="gnudip.mysql"><code>gnudip.mysql</code></a> to define the MySQL database and user.
+
+<p>
+Or you can read and edit the contents of <code>gnudip.mysql</code> setting the
+MySQL database name, and the user name and password to connect to MySQL with,
+and then use:
+
+<pre>
+# mysql -vp < gnudip.mysql
+</pre>
+
+<p><li>
+If you have no existing GnuDIP database and <b>wish to use the Linux/UNIX file system</b>,
+create a new GnuDIP "flat file" database.
+
+<p>
+Delete the two UNIX symbolic links
+<code>/usr/local/gnudip/lib/dbprefs.pm</code> and
+<code>/usr/local/gnudip/lib/dbusers.pm</code>.
+By default these point to
+<code>/usr/local/gnudip/lib/dbprefs_mysql.pm</code> and
+<code>/usr/local/gnudip/lib/dbusers_mysql.pm</code>, respectively,
+which contain the code to handle MySQL.
+
+<p>
+Recreate these links using:
+<pre>
+# ln -s dbprefs_flat.pm /usr/local/gnudip/lib/dbprefs.pm
+# ln -s dbusers_flat.pm /usr/local/gnudip/lib/dbusers.pm
+</pre>
+
+<p>
+By default, <code>dbprefs_flat.pm</code> uses a file named
+<code>/usr/local/gnudip/run/database/globalprefs</code>,
+and <code>dbusers_flat.pm</code> uses a directory named
+<code>/usr/local/gnudip/run/database/users</code>.
+
+<p>
+The directories
+<code>/usr/local/gnudip/run/database</code> and
+<code>/usr/local/gnudip/run/database/users</code>
+are already set up.
+These directories must be readable and writable only by the owner and owned
+by user "<code>nobody</code>" (the "<code>nobody</code>" that Apache will
+run the GnuDIP CGI script as - see step one above). The processes that create
+and update files in these directories will be running as that user.
+
+<p>
+These names can be changed in
+<a href="gnudip/etc/gnudip.conf"><code>/usr/local/gnudip/etc/gnudip.conf</code></a>.
+
+<p><li>
+If you have no existing GnuDIP database and <b>wish to use PostgreSQL</b>,
+create a new GnuDIP PostgreSQL database.
+
+<p>
+Delete the three UNIX symbolic links
+<code>/usr/local/gnudip/lib/dbcxore.pm</code>,
+<code>/usr/local/gnudip/lib/dbprefs.pm</code> and
+<code>/usr/local/gnudip/lib/dbusers.pm</code>.
+By default these point to
+<code>/usr/local/gnudip/lib/dbcore_mysql.pm</code>,
+<code>/usr/local/gnudip/lib/dbprefs_mysql.pm</code> and
+<code>/usr/local/gnudip/lib/dbusers_mysql.pm</code>, respectively,
+which contain the code to handle MySQL.
+
+<p>
+Recreate these links using:
+<pre>
+# ln -s dbcore_pgsql.pm  /usr/local/gnudip/lib/dbcore.pm
+# ln -s dbprefs_pgsql.pm /usr/local/gnudip/lib/dbprefs.pm
+# ln -s dbusers_pgsql.pm /usr/local/gnudip/lib/dbusers.pm
+</pre>
+
+<p>
+Start the PostgreSQL client using:
+
+<pre>
+# psql -U postgres template1
+</pre>
+
+Follow the contents of
+<a href="gnudip.pgsql"><code>gnudip.pgsql</code></a> to define the PostgreSQL database
+and user.
+
+<p>
+Or you can read and edit the contents of <code>gnudip.pgsql</code> setting the
+PostgreSQL database name, and the user name and password to connect to PostgreSQL with,
+and then use:
+
+<pre>
+# psql -U postgres template1 -f gnudip.pgsql
+</pre>
+
+<p><li>
+You may change from one type of GnuDIP database to another by using the scripts
+<a href="gnudip/sbin/gdipunld.pl"><code>gnudip/sbin/gdipunld.pl</code></a>
+and
+<a href="gnudip/sbin/gdipreld.pl"><code>gnudip/sbin/gdipreld.pl</code></a>
+to dump and restore your <u>user</u> database:
+
+<pre>
+# gdipunld.pl -h
+usage: gdipunld.pl [ -h | [ [-o | -a] outfile ] ]
+usage: Dumps the users table to a flat file.
+usage: -h: Print this usage message.
+usage: -o: Specify file to write output to.
+usage: -a: Specify file to append output to.
+
+# gdipreld.pl -h
+usage: gdipreld.pl [ -h | [ -i infile ] ]
+usage: Loads the users table from a flat file.
+usage: -h: Print this usage message.
+usage: -i: Specify file to read from.
+</pre>
+
+<p>
+You will have to re-enter system settings and domains by hand.
+
+</ol>
+
+<h3>DNS Server Set Up</h3>
+
+<ol>
+
+<li>
+If you are using a legacy version of BIND that cannot be updated using
+the dynamic DNS protocol by <code>nsupdate</code>, or
+<a href="http://tinydns.org/">tinydns</a>,
+you must set up the GnuDIP "back end" scripts. This is
+discussed in <a href="BACKEND.html">BACKEND.html</a>.
+
+<p><li>
+<p>
+Otherwise choose a zone or zones, and get BIND setup for dynamic updates
+for these zones.
+
+<p>
+The description provided in the next four steps shows one way to achieve
+this for one zone and key. For other configuration options please read
+the BIND 8 or BIND 9 documentation.
+
+<p><li>
+<p>
+Generate the key files required by the <code>nsupdate</code> command.
+This will at the same time generate a "TSIG key" which you will later
+have to use in configuring the <code>named</code> daemon.
+
+<p>
+For BIND 8 use "<code>dnskeygen</code>" to generate key files.
+This goes something like this sample:
+
+<blockquote>
+<pre>
+# dnskeygen -H 128 -h -n gnudip-key
+** Adding dot to the name to make it fully qualified domain name**
+Generating 128 bit HMAC-MD5 Key for gnudip-key.
+
+Generated 128 bit Key for gnudip-key. id=0 alg=157 flags=513
+
+# ls
+Kgnudip-key.+157+00000.key  Kgnudip-key.+157+00000.private
+# cat Kgnudip-key.+157+00000.private
+Private-key-format: v1.2
+Algorithm: 157 (HMAC)
+Key: fegHlhVt3opPIiK8V4cjLw==
+# cat Kgnudip-key.+157+00000.key
+gnudip-key. IN KEY 513 3 157 fegHlhVt3opPIiK8V4cjLw==
+</pre>
+</blockquote>
+
+<p>
+For BIND 9 use "<code>dnssec-keygen</code>" to generate key files.
+This goes something like this sample:
+
+<blockquote>
+<pre>
+# dnssec-keygen -a hmac-md5 -b 128 -n HOST gnudip-key
+Kgnudip-key.+157+36000
+# ls
+Kgnudip-key.+157+36000.key  Kgnudip-key.+157+36000.private
+# cat Kgnudip-key.+157+36000.private
+Private-key-format: v1.2
+Algorithm: 157 (HMAC)
+Key: fegHlhVt3opPIiK8V4cjLw==
+# cat Kgnudip-key.+157+36000.key
+gnudip-key. IN KEY 513 3 157 fegHlhVt3opPIiK8V4cjLw==
+</pre>
+</blockquote>
+
+<p>
+For both Bind 8 and 9, examine the files that were generated to
+determine the key that was generated. In the examples above this
+key is:
+
+<blockquote><pre>
+fegHlhVt3opPIiK8V4cjLw==
+</pre></blockquote>
+
+You will <u>use this key later to configure your BIND <code>named</code>
+daemon</u>, to control dynamic update access to the GnuDIP dynamic zone. 
+
+<p>
+Move the key files generated to
+<a href="gnudip/etc/"><code>/usr/local/gnudip/etc/</code></a>.
+Remove the samples that are already there.
+These files should not be writable by anyone.
+These files should be readable only by the owner and owned
+by user "<code>nobody</code>" (the "<code>nobody</code>" that Apache will
+run the GnuDIP CGI script as - see step one above). The <code>nsupdate</code>
+command which will read these files will be running as that user.
+
+<p><li>
+<p>
+Update the definition of the "<code>nsupdate</code>" parameter in the
+<a href="gnudip/etc/gnudip.conf"><code>/usr/local/gnudip/etc/gnudip.conf</code></a>
+file.
+
+<p>
+For BIND 8 follow this sample:
+
+<blockquote>
+<pre>
+# BIND nsupdate command
+nsupdate = /usr/bin/nsupdate -v -k /usr/local/gnudip/etc:gnudip-key.
+</pre>
+</blockquote>
+
+Note that the trailing period ("<code>.</code>") is required.
+
+<p>
+For BIND 9 follow this sample:
+
+<blockquote>
+<pre>
+# BIND nsupdate command
+nsupdate = /usr/bin/nsupdate -v -k /usr/local/gnudip/etc/Kgnudip-key.+157+36000.private
+</pre>
+
+Or you could do:
+
+<pre>
+# BIND nsupdate command
+nsupdate = /usr/bin/nsupdate -v
+nsupdate = -k /usr/local/gnudip/etc/Kgnudip-key.+157+36000.private
+</pre>
+</blockquote>
+
+<p>
+Note that parameter names in <code>gnudip.conf</code> may appear more than once.
+The values are concatentated with an intervening blank.
+
+<p>
+As shown above, the command line options for <code>nsupdate</code>
+differ between BIND 8 and BIND 9. However, the <code>nsupdate</code> standard
+input commands generated by GnuDIP are compatible with either BIND 8 or
+BIND 9.
+
+<p><li>
+<p>
+Now you must configure the target BIND <code>named</code> daemon to contain
+the key generated above, and also of course your GnuDIP dynamic zone.
+
+<p>
+Note that <u>the <code>named</code> daemon may run on a different machine than
+the machine that will run the GnuDIP CGI (and thereby the <code>nsupdate</code>
+command)</u>. The <code>nsupdate</code> command determines
+what DNS server to send its update request
+to by doing a DNS lookup for the "<code>SOA</code>" record for the domain name whose
+information is being updated. The <code>SOA</code> record identifies the master DNS
+server for this domain name. <b>The <code>nsupdate</code> command will send the
+update request to the master DNS server for the domain</b>.
+
+<p>
+Recall that the sample TSIG key generated above was:
+
+<blockquote><pre>
+fegHlhVt3opPIiK8V4cjLw==
+</pre></blockquote>
+
+<p>
+Create a file called <code>gnudip-keyfile</code> in your <code>named</code>
+configuration directory.
+This file should not be writable by anyone. This file should be readable only
+by the owner and owned by user "<code>nobody</code>"
+(the "<code>nobody</code>" that the <code>named</code> daemon will run
+as - see step one above).
+The file <code>gnudip-keyfile</code> should contain something like this sample:
+
+<pre>
+key gnudip-key {
+  algorithm hmac-md5;
+  // the TSIG key
+  secret "fegHlhVt3opPIiK8V4cjLw==";
+};
+</pre>
+
+Note that <u>the contents of this file are entirely different from the files
+created during key generation</u> above. This is not a copy of one of those files.
+You will have to <u>create this file manually</u>. The sample key
+"<code>fegHlhVt3opPIiK8V4cjLw==</code>" must be replaced by the key that you
+generated.
+
+<p>
+Now you must add a section to define the GnuDIP dynamic zone in your
+<code>named.conf</code> file.
+
+<p>
+For BIND 8 the new section would look something like:
+
+<blockquote>
+<pre>
+// include definition of GnuDIP update key
+include "gnudip-keyfile";
+
+// define GnuDIP dynamic DNS zone
+zone "dyn.you.net" in {
+  type master;
+  file "run/zone-dyn.you.net";
+  allow-query { any; };
+  allow-update { key gnudip-key; };
+};
+</pre>
+</blockquote>
+
+<p>
+For BIND 9 the new section would look something like:
+
+<blockquote>
+<pre>
+// include definition of GnuDIP update key
+include "gnudip-keyfile";
+
+// define GnuDIP dynamic DNS zone
+zone "dyn.you.net" in {
+  type master;
+  file "run/zone-dyn.you.net";
+  allow-query { any; };
+  update-policy { grant gnudip-key subdomain dyn.you.net; };
+};
+</pre>
+</blockquote>
+
+In the examples above, note that the string <b><code>gnudip-key</code>
+refers to the name</b> of the key,
+whereas the string <b><code>gnudip-keyfile</code> refers to the
+file</b> containing the syntax to define that key name.
+
+<p>
+Notice above that the zone file is in a subdirectory called <code>run</code>.
+This directory should be owned by user "<code>nobody</code>"
+(or whatever user ID <code>named</code> runs as) so that
+<code>named</code> may create files in it.
+
+<p>
+You can set up <code>$TTL</code> and <code>SOA</code> values for the dynamic
+zones by setting up an initial
+zone file for BIND. BIND will read this the first time, and use the values from
+the file. Continuing the previous example, for the file
+<code>run/zone-dyn.you.net</code> try something like this sample:
+
+<pre>
+$TTL 86400 ; default TTL (1 day)
+@          IN SOA   ns.you.net. root.you.net. (
+                      0       ; serial
+                      3600    ; refresh (1 hour)
+                      1800    ; retry (30 minutes)
+                      604800  ; expire (1 week)
+                      0       ; TTL for NACK-s (0 seconds)
+                    )
+           IN NS    ns.you.net.
+           IN A     IP_address
+</pre>
+
+This zone file should again be owned by user <code>nobody</code>, so that
+<code>named</code> may modify it.
+
+<p>
+This sample supposes that you want clients to use
+<code>dyn.you.net</code> as the name of the GnuDIP server, in addition to the
+name of the GnuDIP subdomain.
+The <code>A</code> record is required for this. You will not be allowed to
+use a <code>CNAME</code> record for this, because the name of the record would
+be the same as the name of the <code>SOA</code> record. You can maintain this
+<code>A</code> record using <code>nsupdate</code> if the address changes.
+
+<p>
+The <code>SOA</code> and <code>NS</code> records may point into an entirely
+different domain.
+
+<p>
+Note that <b>the base domain <code>you.net</code> can be made the GnuDIP dynamic
+domain</b> if you wish. If the <code>NS</code> records point to names within
+<code>you.net</code>, you will need glue records in the usual way.
+
+<p>
+Note that <u>the default TTL value in this start up file will not apply</u>
+to the records added using <code>nsupdate</code>. The
+<code>nsupdate</code> command requires a TTL value
+with each record added. GnuDIP will use a value of zero for this TTL, unless a
+value is specified in
+<a href="gnudip/etc/gnudip.conf"><code>/usr/local/gnudip/etc/gnudip.conf</code></a>
+(see below).
+
+<p>
+You may want to <u>retain a copy of this inital zone file</u>, for use with the
+<a href="gnudip/sbin/gdipzone.pl"><code>gnudip/sbin/gdipzone.pl</code></a>
+script discussed below.
+
+<p>
+Note that if you are the operator of a serious
+production shop rather than a home hobbiest, you
+will need to set up BIND to do "<b>dynamic update forwarding</b>"
+and "<b>incremental zone transfers</b>" to slave DNS servers from the master DNS
+server. These details are not explained here.
+
+<p><li>
+If the call to the <code>nsupdate</code> command by the GnuDIP CGI script
+fails for any reason, the precise command that was invoked as well as the input
+that was passed to it and the output from it will be wriiten to the system log.
+
+<p>
+<b>The simplest way to debug your BIND configuration is probably by using
+<code>nsupdate</code>, the <code>dig</code> command and the <code>ping</code>
+command at the UNIX command prompt</b>. For example, <u><b>on the machine where
+the GnuDIP CGI script and <code>nsupdate</code> will run</b></u>, try:
+
+<pre>
+# dig tester.dyn.you.net. soa
+
+; &lt;&lt;&gt;&gt; DiG 9.1.3 &lt;&lt;&gt;&gt; tester.dyn.you.net. soa
+;; global options:  printcmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 34673
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 0
+
+;; QUESTION SECTION:
+;tester.dyn.you.net.            IN      SOA
+
+;; AUTHORITY SECTION:
+dyn.you.net.      0             IN      SOA     you.net. root.you.net. 484 3600 1800 604800 0
+
+;; Query time: 8 msec
+;; SERVER: 192.168.0.2#53(192.168.0.2)
+;; WHEN: Tue Oct 23 14:47:24 2001
+;; MSG SIZE  rcvd: 88
+
+# su - nobody
+# /usr/bin/nsupdate -v -k /usr/local/gnudip/etc/Kgnudip-key.+157+36000.private
+&gt; update add tester.dyn.you.net. 0 A 127.0.0.1
+&gt;
+&gt; #
+# exit
+# ping tester.dyn.you.net.
+PING tester.dyn.you.net (127.0.0.1): 56 data bytes
+64 bytes from 127.0.0.1: icmp_seq=0 ttl=255 time=0.2 ms
+64 bytes from 127.0.0.1: icmp_seq=1 ttl=255 time=0.1 ms
+
+--- tester.dyn.you.net ping statistics ---
+2 packets transmitted, 2 packets received, 0% packet loss
+round-trip min/avg/max = 0.1/0.1/0.2 ms
+#
+</pre>
+
+In the "<code>su</code>" command, the "<code>nobody</code>" that the
+GnuDIP CGI and (X)INETD daemon will run as should be used (see above).
+You may want to try the <code>nsupdate</code> as root first.
+
+<p>
+If your <code>nobody</code> user is not set up to allow the use of
+"<code>su - ...</code>", you may instead try:
+
+<pre>
+# sudo -u nobody /usr/bin/nsupdate -v \
+            -k /usr/local/gnudip/etc/Kgnudip-key.+157+36000.private
+</pre>
+
+<p>
+The output from the <code>dig</code> command shows that <code>nsupdate</code>
+will send its update request to <code>you.net</code>.
+
+<p>
+Note that <code>nsupdate</code> accumulates update input lines until it sees an
+empty line.
+Only then does it do the updates.
+To stop <code>nsupdate</code> use "<code>Ctrl-D</code>" to generate
+an end of file.
+
+<p>
+<b>Remember that BIND comes with documentation</b>.
+
+<p>
+You may also want to take advantage of
+<a href="http://isc.org/services/public/lists/bind-lists.html">
+the BIND mailing lists</a> or
+<a href="http://www.isc.org/ml-archives/">their archives</a>.
+
+</ol>
+
+<h3>Editing the Configuration File</h3>
+
+<blockquote>
+
+Edit
+<a href="gnudip/etc/gnudip.conf"><code>/usr/local/gnudip/etc/gnudip.conf</code></a>.
+There are comments in the sample that is already there.
+
+<p>
+In particular, check whether you need a "<code>-p</code>" option for the "<code>logger</code>"
+commands in order to ensure that log messages go somewhere acceptable. One user has suggested
+"<code>/usr/bin/logger -p local3.err</code>" for Solaris 8 using the default configuration
+for syslogd.
+
+<p>Also, check the path to your sendmail program (or sendmail clone). For example
+Solaris 8 by default puts sendmail in <code>/usr/lib/sendmail</code>.
+
+<p>
+A sendmail alias (or clone equivalent) to direct mail for the "return path" user (the
+GnuDIP "nobody" user unless the sendmail "<code>-f</code>" option is used) to
+<code>/dev/null</code> is also a good idea, so returned mail for a bad E-mail address
+disappears.
+
+<p>
+If you already have a <code>gnudip.conf</code> file for an existing installation,
+<b>review the sample <code>gnudip.conf</code> file for new parameters</b>.
+
+<p>
+Make sure that everything in <code>/usr/local/gnudip/etc/</code> is readable only by
+the owner and owned by user "<code>nobody</code>" (the "<code>nobody</code>" that
+Apache will run the GnuDIP CGI script as - see step one above), and not writable by
+any user.
+
+<p>
+You may wish to create a directory <b><code>/etc/gnudip</code></b>,
+move (i.e. rename) the directory <code>/usr/local/gnudip/etc</code> to
+<code>/usr/local/gnudip/etc_orig</code> (for later reference), and set
+<code>/usr/local/gnudip/etc</code> as a <b>symbolic link</b> to
+<code>/etc/gnudip</code>. Then create your configuration files
+in <code>/etc/gnudip</code>. If you later upgrade, you can then just rename
+<code>/usr/local/gnudip/etc</code> to <code>/usr/local/gnudip/etc_orig</code>, and
+recreate the link. This practice allows the switch to a new release in production
+environments to consist of two "<code>mv</code>" commands and one "<code>ln</code>"
+command, which would take only a few seconds.
+
+</blockquote>
+
+<h3>Apache Web Server Set Up</h3>
+
+<blockquote>
+
+The instructions here are for Apache. But it should be possible to use
+the web interface with other servers.
+
+<p>
+<b>The user maintenance commands or remote maintenance daemon</b> described
+below <b>may be used in place of</b> or in addition to <b>the GnuDIP Web
+interface</b>. However, the HTTP client update interface is incorporated into
+the web interface. The Apache configuration can be made simpler if only
+the HTTP client interface is desired. Only the CGI definition
+statements are required.
+
+</blockquote>
+
+<ol>
+
+<li>
+To run as a standard CGI, add these lines to your Apache configuration file:
+
+<pre>
+Alias /gnudip/html/ /usr/local/gnudip/html/
+&lt;Location /gnudip/html/&gt;
+Options Indexes
+ReadmeName .README
+HeaderName .HEADER
+RemoveHandler .pl
+RemoveType .pl
+AddType text/plain .pl
+&lt;/Location&gt;
+ScriptAlias /gnudip/cgi-bin/ /usr/local/gnudip/cgi-bin/
+</pre>
+
+The URL for the Web Tool will be:
+
+<pre>
+http://yourserver/gnudip/cgi-bin/gnudip.cgi
+</pre>
+
+The self sign up page will be directly available at:
+
+<pre>
+http://yourserver/gnudip/cgi-bin/gnudip.cgi?action=signup
+</pre>
+
+Note that this URL is <b>different than the URL</b> for GnuDIP following the installation
+instructions <b>for Release 2.1.2</b>. Following those instructions the URL would be
+
+<pre>
+http://yourserver/cgi-bin/gnudip2.cgi
+</pre>
+
+To provide compatibility copy the perl script
+<a href="gnudip/cgi-bin/gnudip2.cgi"><code>/usr/local/gnudip/cgi-bin/gnudip2.cgi</code></a>
+to the
+<code>cgi-bin</code> directory for your Apache server (or make a
+symbolic link). This short script will redirect
+to the new URL. Modify
+<a href="gnudip/cgi-bin/gnudip2.cgi"><code>gnudip2.cgi</code></a>
+to match any change you made to the two Apache configuration lines above.
+<p>
+Other Apache configurations are possible.
+
+<p><li>
+The web tool will run under
+<a href="http://perl.apache.org/#modules">mod_perl Apache::Registry</a>.
+
+<p>
+To use mod_perl, instead of the lines described above, add these lines
+to your Apache configuration file:
+
+<pre>
+Alias /gnudip/html/ /usr/local/gnudip/html/
+&lt;Location /gnudip/html/&gt;
+Options Indexes
+ReadmeName .README
+HeaderName .HEADER
+RemoveHandler .pl
+RemoveType .pl
+AddType text/plain .pl
+&lt;/Location&gt;
+Alias /gnudip/cgi-bin/ /usr/local/gnudip/cgi-bin/
+&lt;Location /gnudip/cgi-bin/&gt;
+SetHandler perl-script
+PerlHandler Apache::Registry
+Options +ExecCGI
+PerlSendHeader On
+&lt;/Location&gt;
+</pre>
+
+<p><li>
+The web tool will run under
+<a href="http://www.fastcgi.com/">FastCGI</a>
+using <code>mod_fastcgi</code> and <code>FCGI.pm</code>.
+
+<p>
+To use FastCGI, instead of the lines described above, add these lines
+to your Apache configuration file:
+
+<pre>
+Alias /gnudip/html/ /usr/local/gnudip/html/
+&lt;Location /gnudip/html/&gt;
+Options Indexes
+ReadmeName .README
+HeaderName .HEADER
+RemoveHandler .pl
+RemoveType .pl
+AddType text/plain .pl
+&lt;/Location&gt;
+Alias /gnudip/cgi-bin/ /usr/local/gnudip/fcgi-bin/
+&lt;Location /gnudip/cgi-bin/&gt;
+SetHandler fastcgi-script
+Options +ExecCGI
+&lt;/Location&gt;
+</pre>
+
+<p>
+When running under mod_perl or FastCGI, adding the line
+"<code>persistance = YES</code>"
+to <a href="gnudip/etc/gnudip.conf">gnudip.conf</a>
+will cause the web tool to use persistant database connections, and to
+retain the contents of <a href="gnudip/etc/gnudip.conf">gnudip.conf</a>,
+the preferences from the <code>globalprefs</code> table and the
+list of domains from the <code>domains</code> table,
+and any other configuration files in memory, rather
+than re-accessing these files or tables. Make sure that persistance is not on when
+configuring your system while running under mod_perl or FastCGI.
+
+</ol>
+
+<h3>Customizing the Web Interface</h3>
+
+<ol>
+
+<li>
+The parameters <code>header_file</code> and <code>trailer_file</code> in
+<a href="gnudip/etc/gnudip.conf">gnudip.conf</a>
+specify a file of HTML to be included at the top and bottom of each
+HTML page, respectively. An example of what can be done using these
+files is provided.
+
+<p><li>
+The parameters <code>URL_sendURL</code>, <code>URL_self_signup</code>
+and <code>URL_delthisuser</code> in
+<a href="gnudip/etc/gnudip.conf">gnudip.conf</a>
+specify URL-s which should take the place of the "Forgotten Password",
+"Self Registration" and "Delete Current User" form buttons.
+See the comments in <a href="gnudip/etc/gnudip.conf">gnudip.conf</a>
+for more information.
+
+<p><li>
+The parameters <code>no_robots_prfx</code> and <code>no_robots_imgcmd</code> in
+<a href="gnudip/etc/gnudip.conf">gnudip.conf</a>
+must be correctly specified in order to user the GnuDIP feature to
+suppress automated abuse of "Self Registration", "Forgotten Password"
+and "Change E-mail Address".
+See the comments in <a href="gnudip/etc/gnudip.conf">gnudip.conf</a>.
+If you have <a href="http://www.ImageMagick.org/">ImageMagick</a>
+installed then the
+<a href="gnudip/sbin/textimage.sh">
+sample/default text image generation script</a>
+should work for you.
+
+<p>
+Once you have ensured the defaults will work, or provided and alternative
+image generation script, you can turn this option on in "System Settings"
+in the web interface.
+
+<p>
+<b>Without this, the GnuDIP Web Interface is vulnerable to being used as the
+"man in the middle" for an E-mail bombardment attack.</b>
+
+<p>
+A program can "GET" and "POST" the pages that send an E-mail
+repeatedly to send an E-mail bombardment to a third party. The
+bombardment will seem to come from the GnuDIP site.
+
+</ol>
+
+<h3>(X)INETD Daemon Set Up</h3>
+
+<ol>
+
+<li>
+Add an entry to <code>/etc/services</code> like this sample:
+
+<pre>
+gnudip          3495/tcp
+</pre>
+
+<p><li>
+If you use the
+<a href="http://www.synack.net/xinetd/"><code>xinetd</code></a>
+replacement for <code>inetd</code>, add an entry to
+<code>/etc/xinetd.conf</code> like this sample:
+
+<pre>
+service gnudip
+{
+	flags       = REUSE
+	socket_type = stream
+	protocol    = tcp
+	wait        = no
+	user        = nobody
+	server      = /usr/local/gnudip/sbin/gdipinet.pl
+	bind        = 0.0.0.0
+        only_from   = 192.168.0.0/24
+        only_from   += 127.0.0.1
+        only_from   += 24.64.0.0/13
+        only_from   += 64.5.210.224/31
+        only_from   += 64.5.221.128/27
+}
+</pre>
+
+You should of course choose values for "<code>only_from</code>" that are
+appropriate to your circumstances. You may want to just leave these lines
+out.
+
+<p>
+Note that the "<code>nobody</code>" user ID used here should be <b>the same one
+Apache will run the GnuDIP CGI script as</b> (see step one above).
+
+<p>
+If you have XINETD with TCP wrappers compiled in, make an entry in
+<code>/etc/hosts.allow</code> like this sample:
+
+<pre>
+gdipinet.pl: 24.64.0.0/255.248.0.0        \
+             64.5.210.224/255.255.255.232 \
+             64.5.221.128/255.255.255.160
+</pre>
+
+For early releases of XINETD with TCP wrappers, you must use the
+service name instead of the process/program name, as follows:
+
+<pre>
+gnudip: 24.64.0.0/255.248.0.0        \
+        64.5.210.224/255.255.255.232 \
+        64.5.221.128/255.255.255.160
+</pre>
+
+If you left out "<code>only_from</code>" above, then you would instead
+use a line like:
+
+<pre>
+gdipinet.pl: ALL
+</pre>
+
+or for early releases of XINETD
+
+<pre>
+gnudip: ALL
+</pre>
+
+<p><li>
+Or make an equivalent entry in <code>/etc/inetd.conf</code> like this sample:
+
+<pre>
+gnudip	stream	tcp	nowait	nobody	/usr/sbin/tcpd	/usr/local/gnudip/sbin/gdipinet.pl
+</pre>
+
+Note that the tokens are separated by tab characters.
+
+<p>
+Note that the "<code>nobody</code>" user ID used here should be <b>the same one
+Apache will run the GnuDIP CGI script as</b> (see step one above).
+
+<p>
+Make an entry in <code>/etc/hosts.allow</code> like this sample:
+
+<pre>
+gdipinet.pl: 24.64.0.0/255.248.0.0        \
+             64.5.210.224/255.255.255.232 \
+             64.5.221.128/255.255.255.160
+</pre>
+
+If you are not imposing access restrictions, then you would instead
+use a line like:
+
+<pre>
+gdipinet.pl: ALL
+</pre>
+
+<p><li>
+If you have restricted the IP addresses for <code>gdipinet.pl</code> using
+<code>/etc/xinetd.conf</code> and/or <code>/etc/hosts.allow</code>,
+you may want to restrict the IP addresses for this port in your firewall too.
+
+<p><li>
+We assume in what follows that you have added
+<a href="gnudip/sbin/"<code>/usr/local/gnudip/sbin</code></a>
+to your <code>PATH</code> environment variable.
+
+<p><li>
+Check that the <code>logger</code> command used by the (X)INETD script
+has been correctly defined by using
+<a href="gnudip/sbin/gdipinet.pl"><code>gnudip/sbin/gdipinet.pl</code></a>
+at the command line. This should go something like this:
+
+<pre>
+# su - nobody
+# gdipinet.pl
+Could not get IP address of client
+# exit 
+</pre>
+
+Here, the "<code>nobody</code>" that the (X)INETD daemon will run as
+should be used (see above).
+
+<p>
+If your <code>nobody</code> user is not set up to allow the use of
+"<code>su - ...</code>", you may instead try:
+
+<pre>
+# pushd /tmp
+# sudo -u nobody gdipinet.pl
+Could not get IP address of client
+# popd
+</pre>
+
+<p>
+Ensure that the message "<code>Could not get IP address of client</code>"
+also appears in your system log.
+
+<p>
+This test is important. <b>The (X)INETD daemon has no other way to report
+errors</b>.
+
+<p>
+Also, note that the <code>gdipinet.pl</code> script suppresses
+Perl warning and error messages (that is "STDERR") shortly after it starts,
+since under (X)INETD these would get sent to the network client.
+It is however possible to capture these for trouble shooting:
+
+<pre>
+# gdipinet.pl -h
+usage: gdipinet.pl [ -h | -e STDERR_file ]
+usage: GnuDIP (X)INETD Daemon.
+usage: -h: Print this usage message.
+usage: -e: Specify filename prefix for STDERR output. The file name
+usage:     will be this prefix followed by the process ID.
+</pre>
+
+You could for example use "<code>gdipinet.pl -e /tmp/gdipinet_STDERR_</code>".
+
+</ol>
+
+<h3>Configure the Web Interface</h3>
+
+<ol>
+
+<li>
+Create an administrative user for gnudip using
+<a href="gnudip/sbin/gdipadmin.pl"><code>gnudip/sbin/gdipadmin.pl</code></a>:
+
+<pre>
+# gdipadmin.pl -h
+usage: gdipadmin.pl [ -h | [ -u ] userid password ]
+usage: Add GnuDIP administrative user "user" with password "password".
+usage: -h: Print this usage message.
+usage: -u: Update user if it already exists.
+</pre>
+
+<p>
+If you are using the "flat file" GnuDIP database, then before running
+<code>gdipadmin.pl</code> do:
+
+<pre>
+# su - nobody
+</pre>
+
+Here, the same "<code>nobody</code>" as used for the CGI scripts and the (X)INETD
+daemon should be used (see step one above).
+This will ensure that the file that is created is owned by user "<code>nobody</code>",
+and can be used by these GnuDIP scripts.
+
+<p>
+If your <code>nobody</code> user is not set up to allow the use of
+"<code>su - ...</code>", you may instead try:
+
+<pre>
+# pushd /tmp
+# sudo -u nobody gdipadmin.pl ...
+# popd
+</pre>
+
+<p>
+Note that administrative users cannot be used as dynamic host names. Unlike
+"host" users, they do not exist only within a particular domain. <b>Any user
+name you use for an administrative user will become "reserved", and
+unavailable as a dynamic host name</b>.
+
+<p><li>
+<font size="+1"><b>
+In the next step, or any time you encounter a problem with the web tool,
+remember to check the <u>system log</u> for error messages
+from GnuDIP. If the Web Tool encounters any difficulties using the
+<code>logger</code> command, error messages will be written to the
+<u>Apache error log</u>.
+</b></font>
+
+<p>
+<font size="+1">
+In particular, <b><u>look in the system log or Apache error log for error
+messages</u></b> if you get an error from the web tool like this:
+</font>
+
+<p>
+<center><table border="1"><tr><td>
+
+<center>
+<h2>Error: GnuDIP Configuration or Interface Problem</h2>
+An internal GnuDIP operation has failed, due to a configuration error, or
+the failure of a system service required by GnuDIP.
+<p>
+Please report this problem to your administrator if it persists.
+</center>
+
+</tr></table></center>
+
+<p><li>
+Go to the Web Tool and login as this new user.
+
+<p>
+Using "Administrative Settings",
+add more configuration stuff. There are explanations on the page.
+In particular, you will need to set your main GnuDIP domain here.
+
+<p>
+If you want more than one domain, use "Add Domain" to add them.
+
+<p>
+If you did not enable self registration for users, use "Add User" to add users.
+
+<p><li>
+If in the future you ever remove a domain, or turn off wildcards or
+mail exchangers, you should use the script
+<a href="gnudip/sbin/gdipdbfix.pl"><code>gnudip/sbin/gdipdbfix.pl</code></a>
+to bring the user database into agreement with the new configuration options:
+
+<pre>
+# gdipdbfix.pl -h
+usage: gdipdbfix.pl [ -h ]
+usage: Scans the database and modifies or deletes users in
+usage: the user database in order to be consistent with the
+usage: set of domains and the administrative settings.
+usage: -h: Print this usage message.
+</pre>
+
+</ol>
+
+<h3>Keeping DNS in Sync with the Database</h3>
+
+<blockquote>
+
+You may want to use the script
+<a href="gnudip/sbin/gdipzone.pl"><code>gnudip/sbin/gdipzone.pl</code></a>
+in a weekly or monthly scheduled job to reload the zone files from scratch:
+
+<pre>
+# gdipzone.pl -h
+usage: gdipzone.pl [ -h | [ -o outfile ] [domain] ]
+usage: Scans the database and generates nsupdate input to create zone
+usage: records. Scans for all domains unless "domain" is specified.
+usage: -h: Print this usage message.
+usage: -o: Specify file to write output to.
+</pre>
+
+<p>
+Following the example above, the process would be:
+
+<ul>
+<li>
+shutdown <code>named</code> using "<code>ndc stop</code>" for BIND 8 or
+"<code>rndc stop</code>" for BIND 9.
+<p><li>
+for BIND 9, delete the file <code>run/zone-dyn.you.net.jnl</code>
+<p>
+Make certain the "<code>rndc stop</code>" worked before you do this!!!
+<p><li>
+replace the file <code>run/zone-dyn.you.net</code> with an initial zone
+file like the one used above
+<p><li>
+restart <code>named</code>
+<p><li>
+run <code>nsupdate</code> using the output from <code>gdipzone.pl</code>
+as input
+</ul>
+
+</blockquote>
+
+<h3>Purging Unused User Names</h3>
+
+<blockquote>
+
+You may want to use the script
+<a href="gnudip/sbin/gdipdlet.pl"><code>gnudip/sbin/gdipdlet.pl</code></a>
+in a nightly or weekly scheduled job to delete database rows and any zone records for
+users whose IP address has not been updated for a specified number of days.
+
+<pre>
+# gdipdlet.pl -h
+usage: gdipdlet.pl [ -h | [ -d ] [ -o outfile ] days ]
+usage: Generates the nsupdate input needed to delete zone records
+usage: not updated within "days" days. Optionally, it also
+usage: deletes the user from the database.
+usage: -h: Print this usage message.
+usage: -d: Delete users from the database.
+usage: -o: Specify file to write output to.
+</pre>
+
+</blockquote>
+
+<h3>User Maintenance Commands</h3>
+
+<blockquote>
+
+There are four line commands that may be useful for user maintenance from
+the command line or scripts. These are described in
+<a href="maintenance_commands.html"><code>maintenance_commands.html</code></a>.
+
+</blockquote>
+
+<h3>Remote Maintenance Daemon</h3>
+
+<blockquote>
+
+There is also an (X)INETD daemon that may be used to provide the same
+capabilities as the user maintenance commands via a network protocol.
+This is described in <a href="remote.html"><code>remote.html</code></a>.
+
+</blockquote>
+
+<h3>Linking Non-GnuDIP Host Names to a GnuDIP Host Name</h3>
+
+<blockquote>
+
+You may want to use the script
+<a href="gnudip/sbin/multinsupd.pl"><code>gnudip/sbin/multinsupd.pl</code></a>
+to filter the commands being passed to the <code>nsupdate</code> command,
+in order to insert non-GnuDIP aliases for GnuDIP host names. See the comments
+in the script, as well as the example and comments in
+<a href="gnudip/etc/gnudip.conf"><code>gnudip/etc/gnudip.conf</code></a>,
+<a href="gnudip/etc/minidip.conf"><code>gnudip/etc/minidip.conf</code></a> and
+<a href="gnudip/etc/multinsupd.conf"><code>gnudip/etc/multinsupd.conf</code></a>.
+
+<p>
+This script goes some distance towards addressing the item
+"A Mechanism to Link Non-GnuDIP Host Names to a GnuDIP Host Name" in
+<a href="TODO.html"><code>TODO.html</code></a>.
+
+</blockquote>
+
+<h3>-T, -w, "use warnings;" and All That</h3>
+
+<blockquote>
+
+Perl fans may notice that the code does not use "-T" or "-w" on the
+"shebang" line. Nor is "use warnings;" used.
+<b>This is deliberate.</b> These options are helpful in testing, but a
+great maintenance nuisance when used in publicly released software.
+
+<p>
+If you want to add these, go ahead. If you get warning or error messages,
+fix the problem and submit a patch to the mailing list, explaining what
+release of Perl you are using, and any upgrades you have made to the core
+Perl modules. While you are at it, perhaps you should ask in your E-mail
+about joining the GnuDIP support team.
+
+</blockquote>
+
+<p><hr>
+
+</body>
+
+</html>
